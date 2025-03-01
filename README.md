@@ -19,12 +19,13 @@ A WIP Game for [Code for a Cause](https://itch.io/jam/code-for-a-cause)
 - [x] Basic Bevy Template
 - [ ] Game Screen (like Start, Pause, Keys menu)
 - [ ] Level Design (Parkour, etc.)
+- [ ] Score System
 - [ ] Player
     - [ ] Time Slow Ability _+ Other Abilities_
     - [ ] Speed Increase
-    - [ ] Movement
+    - [x] Movement
         - [x] Basic Movement _(like Up, Right and Left)_
-        - [ ] Sync `X` Camera Movement
+        - [x] Sync `X` Camera Movement
 - [ ] Shadow
     - [ ] Mimic Player Moves
     - [ ] Impact from Player Ability
