@@ -37,6 +37,7 @@ and create custom map._
 
 - [x] Basic Bevy Template
 - [ ] Game Screen (like Start, Pause, Keys menu)
+    - [x] Game Pause Mechanism
 - [ ] Level Design (Parkour, etc.)
 - [ ] Score System
 - [ ] Player

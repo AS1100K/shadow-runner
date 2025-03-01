@@ -7,6 +7,7 @@
 //! position.
 
 use crate::camera::MainCamera;
+use crate::GameState;
 use bevy::{prelude::*, window::PrimaryWindow};
 
 pub struct Editor;
@@ -137,13 +138,15 @@ fn update_text_component(
     windows: Query<&Window>,
     clicked_entities_info: Res<ClickedEntitiesInfo>,
     drag_state: Res<DragState>,
+    game_state: Res<GameState>,
 ) {
     for mut text in &mut query {
         let window = windows.single();
         let info_string = clicked_entities_info.clicked_entities.join("\n");
 
         let debug_info = format!(
-            "Debug Info\nWindow Width: {}\nWindow Height: {}\n\n{}",
+            "Debug Info\nIs Paused: {}\nWindow Width: {}\nWindow Height: {}\n\n{}",
+            game_state.is_paused,
             window.width(),
             window.height(),
             info_string
