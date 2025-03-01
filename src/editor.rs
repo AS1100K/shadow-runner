@@ -14,8 +14,7 @@ pub struct Editor;
 
 impl Plugin for Editor {
     fn build(&self, app: &mut App) {
-        app.insert_resource(ClickedEntitiesInfo::default())
-            .insert_resource(DragState::default())
+        app.insert_resource(DragState::default())
             .add_systems(Startup, setup_text_component)
             .add_systems(Update, cusor_click_system)
             .add_systems(Update, handle_dragging)
@@ -42,9 +41,12 @@ impl DragState {
     }
 }
 
-#[derive(Resource, Default)]
-pub struct ClickedEntitiesInfo {
-    clicked_entities: Vec<String>,
+#[derive(Resource)]
+pub struct ClickedEntityInfo {
+    entity_name: &'static str,
+    // entity: Entity,
+    sprite_pos: Vec2,
+    sprite_size: Vec2,
 }
 
 #[derive(Component)]
@@ -70,13 +72,12 @@ fn cusor_click_system(
     clickable_query: Query<(Entity, &Transform, &Sprite, &Clickable)>,
     cursor_pos: Query<&Window, With<PrimaryWindow>>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-    mut clicked_entities_info: ResMut<ClickedEntitiesInfo>,
+    mut commands: Commands,
     mut drag_state: ResMut<DragState>,
 ) {
     if mouse_button_input.just_pressed(MouseButton::Left) {
         let shift_held = keyboard.pressed(KeyCode::ShiftLeft);
 
-        let mut clickable_vec = Vec::new();
         if let Some(world_position) = cursor_position(cursor_pos, camera_q) {
             for (entity, transform, sprite, clickable) in clickable_query.iter() {
                 let sprite_position = transform.translation.truncate();
@@ -105,17 +106,15 @@ fn cusor_click_system(
                             drag_state.drag_start = Some(world_position);
                         }
 
-                        clickable_vec.push(format!(
-                            "Clicked \"{}\"\n Sprite Pos: {:?}\n Sprite Size: {:?}",
-                            clickable.0, sprite_position, sprite_size
-                        ));
+                        commands.insert_resource(ClickedEntityInfo {
+                            entity_name: clickable.0,
+                            // entity,
+                            sprite_pos: sprite_position,
+                            sprite_size: sprite_size,
+                        });
                     }
                 }
             }
-        }
-
-        if !clickable_vec.is_empty() {
-            clicked_entities_info.clicked_entities = clickable_vec;
         }
     }
 }
@@ -136,13 +135,20 @@ fn setup_text_component(mut commands: Commands) {
 fn update_text_component(
     mut query: Query<&mut Text, With<InfoText>>,
     windows: Query<&Window>,
-    clicked_entities_info: Res<ClickedEntitiesInfo>,
+    clicked_entity_info: Option<Res<ClickedEntityInfo>>,
     drag_state: Res<DragState>,
     game_state: Res<GameState>,
 ) {
     for mut text in &mut query {
         let window = windows.single();
-        let info_string = clicked_entities_info.clicked_entities.join("\n");
+        let info_string = if let Some(info) = clicked_entity_info.as_ref() {
+            format!(
+                "Clicked \"{}\"\n Sprite Pos: {:?}\n Sprite Size: {:?}",
+                info.entity_name, info.sprite_pos, info.sprite_size
+            )
+        } else {
+            String::new()
+        };
 
         let debug_info = format!(
             "Debug Info\nIs Paused: {}\nWindow Width: {}\nWindow Height: {}\n\n{}",
