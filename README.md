@@ -1,4 +1,4 @@
-# Shadown Runner
+# Shadow Runner
 
 A WIP Game for [Code for a Cause](https://itch.io/jam/code-for-a-cause)
 

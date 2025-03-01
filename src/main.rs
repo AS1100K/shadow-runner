@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use shadown_runner::{camera::MainCameraPlugin, physics::PhysicsPlugin, EntitySpawnerPlugin};
+use shadow_runner::{camera::MainCameraPlugin, physics::PhysicsPlugin, EntitySpawnerPlugin};
 
 fn main() {
     App::new()
