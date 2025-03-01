@@ -1,11 +1,10 @@
 use bevy::prelude::*;
-use bevy_rapier2d::prelude::*;
 
 pub const PLAYER_WIDTH: f32 = 20.;
 pub const PLAYER_HEIGHT: f32 = 100.;
 
 #[derive(Component)]
-#[require(Velocity, Transform)]
+#[require(Transform)]
 pub struct Player;
 
 pub struct PlayerPlugin;
@@ -22,22 +21,12 @@ fn movement(
     time: Res<Time>,
 ) {
     for mut transform in &mut query {
-        // Right Movement
-        if keys.pressed(KeyCode::KeyD) || keys.pressed(KeyCode::ArrowRight) {
-            transform.translation.x += 100. * time.delta_secs();
-        }
-
-        // Left Movement
-        if keys.pressed(KeyCode::KeyA) || keys.pressed(KeyCode::ArrowLeft) {
-            transform.translation.x -= 100. * time.delta_secs();
-        }
-
         // Up/Jump Movement
         if keys.pressed(KeyCode::KeyW)
             || keys.pressed(KeyCode::ArrowUp)
             || keys.pressed(KeyCode::Space)
         {
-            transform.translation.y += 100. * time.delta_secs();
+            transform.translation.y += 500. * time.delta_secs();
         }
     }
 }
