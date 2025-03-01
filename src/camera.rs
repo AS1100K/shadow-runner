@@ -23,22 +23,23 @@ fn spawn_camera(mut commands: Commands) {
 fn camera_movement(
     mut query: Query<&mut Transform, With<MainCamera>>,
     keys: Res<ButtonInput<KeyCode>>,
+    time: Res<Time>,
 ) {
     for mut camera in &mut query {
         if keys.pressed(KeyCode::Numpad6) {
-            camera.translation.x += 10.;
+            camera.translation.x += 500. * time.delta_secs();
         }
 
         if keys.pressed(KeyCode::Numpad8) {
-            camera.translation.y += 10.;
+            camera.translation.y += 500. * time.delta_secs();
         }
 
         if keys.pressed(KeyCode::Numpad4) {
-            camera.translation.x -= 10.;
+            camera.translation.x -= 500. * time.delta_secs();
         }
 
         if keys.pressed(KeyCode::Numpad2) {
-            camera.translation.y -= 10.;
+            camera.translation.y -= 500. * time.delta_secs();
         }
 
         if keys.just_pressed(KeyCode::Numpad5) {
