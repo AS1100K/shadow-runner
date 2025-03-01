@@ -59,7 +59,7 @@ fn sync_camera(
 fn camera_movement(
     mut query: Query<(&mut Transform, &mut MainCamera)>,
     keys: Res<ButtonInput<KeyCode>>,
-    time: Res<Time>,
+    time: Res<Time<bevy::prelude::Real>>,
 ) {
     for (mut camera_transform, mut main_camera) in &mut query {
         if keys.pressed(KeyCode::Numpad6) || keys.all_pressed([KeyCode::AltLeft, KeyCode::KeyD]) {
