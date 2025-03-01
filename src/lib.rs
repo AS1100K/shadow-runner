@@ -2,6 +2,8 @@ use bevy::prelude::*;
 use player::{Player, PlayerPlugin};
 
 pub mod camera;
+#[cfg(feature = "debug")]
+pub mod editor;
 pub mod levels;
 pub mod physics;
 pub mod player;

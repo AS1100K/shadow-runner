@@ -13,6 +13,8 @@ pub struct Player {
     pub velocity: Velocity,
     pub transform: Transform,
     pub player_entity: PlayerEntity,
+    #[cfg(feature = "debug")]
+    pub clickable: crate::editor::Clickable,
 }
 
 impl Player {
@@ -30,6 +32,8 @@ impl Player {
             velocity: Velocity::linear(Vec2::new(100., 0.)),
             transform: Transform::from_xyz(-window_width / 2., 0., 0.),
             player_entity: PlayerEntity,
+            #[cfg(feature = "debug")]
+            clickable: crate::editor::Clickable("Player"),
         }
     }
 }
