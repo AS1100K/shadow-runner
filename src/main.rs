@@ -1,9 +1,11 @@
 use bevy::prelude::*;
-use shadown_runner::camera::MainCameraPlugin;
+use shadown_runner::{camera::MainCameraPlugin, physics::PhysicsPlugin, EntitySpawnerPlugin};
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
+        .add_plugins(PhysicsPlugin)
+        .add_plugins(EntitySpawnerPlugin)
         .add_plugins(MainCameraPlugin)
         .run();
 }

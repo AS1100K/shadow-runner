@@ -11,7 +11,7 @@ A WIP Game for [Code for a Cause](https://itch.io/jam/code-for-a-cause)
 
 2. Run the Game:
     ```bash
-    $ cargo run --target wasm32-unknown-unknown
+    $ cargo run --features debug --target wasm32-unknown-unknown
     ```
 
 ## TODOs
@@ -23,6 +23,8 @@ A WIP Game for [Code for a Cause](https://itch.io/jam/code-for-a-cause)
     - [ ] Time Slow Ability _+ Other Abilities_
     - [ ] Speed Increase
     - [ ] Movement
+        - [x] Basic Movement _(like Up, Right and Left)_
+        - [ ] Sync `X` Camera Movement
 - [ ] Shadow
     - [ ] Mimic Player Moves
     - [ ] Impact from Player Ability
