@@ -110,7 +110,7 @@ fn cusor_click_system(
                             entity_name: clickable.0,
                             // entity,
                             sprite_pos: sprite_position,
-                            sprite_size: sprite_size,
+                            sprite_size,
                         });
                     }
                 }
