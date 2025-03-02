@@ -30,7 +30,7 @@ and unlocks the follows keybinds:
 |<kbd>-</kbd>                                                                       |Zoom Out Camera  |
 
 Additionally, you can also **Left Click** any component, to find it's size and position as well
-as you can move it by holding <kbd>Shift</kbd> and draging it by **Left Click**. _Currently Broken_
+as you can move it by holding <kbd>Shift</kbd> and draging it by **Left Click**.
 
 _I am also thinking of making these debug tools a part of the game and allow people to use them
 and create custom map._

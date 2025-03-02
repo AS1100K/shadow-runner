@@ -45,8 +45,7 @@ impl DragState {
 pub struct ClickedEntityInfo {
     entity_name: &'static str,
     // entity: Entity,
-    sprite_pos: Vec2,
-    sprite_size: Vec2,
+    translation: Vec2,
 }
 
 #[derive(Component)]
@@ -69,7 +68,7 @@ fn cursor_position(
 fn cusor_click_system(
     mouse_button_input: Res<ButtonInput<MouseButton>>,
     keyboard: Res<ButtonInput<KeyCode>>,
-    clickable_query: Query<(Entity, &Transform, &Sprite, &Clickable)>,
+    clickable_query: Query<(Entity, &Transform, &Clickable)>,
     cursor_pos: Query<&Window, With<PrimaryWindow>>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     mut commands: Commands,
@@ -79,38 +78,28 @@ fn cusor_click_system(
         let shift_held = keyboard.pressed(KeyCode::ShiftLeft);
 
         if let Some(world_position) = cursor_position(cursor_pos, camera_q) {
-            for (entity, transform, sprite, clickable) in clickable_query.iter() {
+            for (entity, transform, clickable) in clickable_query.iter() {
                 let sprite_position = transform.translation.truncate();
-                let distance = world_position.distance(sprite_position);
 
-                if let Some(sprite_size) = sprite.custom_size {
-                    // Check if click is within sprite bounds using size
-                    let half_width = sprite_size.x / 2.0;
-                    let half_height = sprite_size.y / 2.0;
+                // Check if click is within 16x16 tile bounds
+                let half_size =
+                    Vec2::new((crate::GRID_SIZE / 2) as f32, (crate::GRID_SIZE / 2) as f32);
+                let min_bound = sprite_position - half_size;
+                let max_bound = sprite_position + half_size;
 
-                    let x_distance = (world_position.x - sprite_position.x).abs();
-                    let y_distance = (world_position.y - sprite_position.y).abs();
-
-                    if x_distance <= half_width && y_distance <= half_height {
-                        log::debug!(
-                            "Clicked \"{}\": Sprite Pos: {:?}, Sprite Size: {:?}, Distance: {:?}",
-                            clickable.0,
-                            sprite_position,
-                            sprite_size,
-                            distance
-                        );
-
-                        if shift_held {
-                            drag_state.dragging_entity_name = clickable.0;
-                            drag_state.dragging_entity = Some(entity);
-                            drag_state.drag_start = Some(world_position);
-                        }
-
+                if world_position.x >= min_bound.x
+                    && world_position.x <= max_bound.x
+                    && world_position.y >= min_bound.y
+                    && world_position.y <= max_bound.y
+                {
+                    if shift_held {
+                        drag_state.dragging_entity = Some(entity);
+                        drag_state.dragging_entity_name = clickable.0;
+                        drag_state.drag_start = Some(world_position);
+                    } else {
                         commands.insert_resource(ClickedEntityInfo {
                             entity_name: clickable.0,
-                            // entity,
-                            sprite_pos: sprite_position,
-                            sprite_size,
+                            translation: sprite_position,
                         });
                     }
                 }
@@ -143,8 +132,8 @@ fn update_text_component(
         let window = windows.single();
         let info_string = if let Some(info) = clicked_entity_info.as_ref() {
             format!(
-                "Clicked \"{}\"\n Sprite Pos: {:?}\n Sprite Size: {:?}",
-                info.entity_name, info.sprite_pos, info.sprite_size
+                "Clicked \"{}\"\n Pos: {:?}",
+                info.entity_name, info.translation
             )
         } else {
             String::new()
