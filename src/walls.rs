@@ -10,10 +10,7 @@ pub struct WallPlugin;
 impl Plugin for WallPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, spawn_wall_collisions)
-            .register_ldtk_int_cell::<Wall>(1) // Grass_Floor
-            .register_ldtk_int_cell::<Wall>(2) // Stone_Floor
-            .register_ldtk_int_cell::<Wall>(3) // Wall
-            .register_ldtk_int_cell::<Wall>(4); // Bridge Floor
+            .register_ldtk_int_cell::<Wall>(1);
     }
 }
 
@@ -29,7 +26,6 @@ pub struct WallEntity;
 
 // This system is taken from platformer example in `bevy_ecs_ldtk`
 // Code: https://github.com/Trouv/bevy_ecs_ldtk/blob/main/examples/platformer/walls.rs#L32
-
 pub fn spawn_wall_collisions(
     mut commands: Commands,
     wall_query: Query<(&GridCoords, &Parent), Added<WallEntity>>,

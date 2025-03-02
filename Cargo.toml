@@ -5,7 +5,6 @@ edition = "2021"
 
 [features]
 debug = ["bevy_rapier2d/debug-render-2d"]
-wayland = ["bevy/wayland"]
 
 [dependencies]
 bevy = "0.15"

@@ -26,6 +26,8 @@ and unlocks the follows keybinds:
 |<kbd>Shift</kbd> + <kbd>D</kbd>, <kbd>Option</kbd> + <kbd>D</kbd> or <kbd>6 →</kbd>|Move Camera Right|
 |<kbd>Shift</kbd> + <kbd>A</kbd>, <kbd>Option</kbd> + <kbd>A</kbd> or <kbd>4 ←</kbd>|Move Camera Left |
 |<kbd>Shift</kbd> + <kbd> </kbd>, <kbd>Option</kbd> + <kbd> </kbd> or <kbd>5</kbd>  |Reset Camera     |
+|<kbd>+</kbd>                                                                       |Zoom In Camera   |
+|<kbd>-</kbd>                                                                       |Zoom Out Camera  |
 
 Additionally, you can also **Left Click** any component, to find it's size and position as well
 as you can move it by holding <kbd>Shift</kbd> and draging it by **Left Click**. _Currently Broken_

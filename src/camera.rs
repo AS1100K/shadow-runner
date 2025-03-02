@@ -67,11 +67,11 @@ fn sync_camera(
 
 #[cfg(feature = "debug")]
 fn camera_movement(
-    mut query: Query<(&mut Transform, &mut MainCamera)>,
+    mut query: Query<(&mut Transform, &mut MainCamera, &mut OrthographicProjection)>,
     keys: Res<ButtonInput<KeyCode>>,
     time: Res<Time<bevy::prelude::Real>>,
 ) {
-    for (mut camera_transform, mut main_camera) in &mut query {
+    for (mut camera_transform, mut main_camera, mut orthographic_projection) in &mut query {
         if keys.pressed(KeyCode::Numpad6) || keys.all_pressed([KeyCode::AltLeft, KeyCode::KeyD]) {
             main_camera.player_delta += 500. * time.delta_secs();
         }
@@ -93,6 +93,14 @@ fn camera_movement(
         {
             main_camera.player_delta = 0.;
             camera_transform.translation.y = 0.;
+        }
+
+        if keys.just_pressed(KeyCode::NumpadAdd) {
+            orthographic_projection.scale -= 0.1;
+        }
+
+        if keys.just_pressed(KeyCode::NumpadSubtract) {
+            orthographic_projection.scale += 0.1;
         }
     }
 }
