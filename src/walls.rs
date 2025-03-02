@@ -5,11 +5,13 @@ use bevy::{
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 
+use crate::utils::Maybe;
+
 pub struct WallPlugin;
 
 impl Plugin for WallPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, spawn_wall_collisions)
+        app.add_systems(Update, (spawn_wall_collisions, read_events).chain())
             .register_ldtk_int_cell::<Wall<WallEntity>>(1)
             .register_ldtk_int_cell::<Wall<OutOfWorldEntity>>(2);
     }
@@ -18,12 +20,49 @@ impl Plugin for WallPlugin {
 #[derive(Default, Component)]
 pub struct OutOfWorldEntity;
 
-#[derive(Default, Bundle, LdtkIntCell)]
-pub struct Wall<C: Component + Default> {
+#[derive(Bundle, LdtkIntCell)]
+pub struct Wall<C: Component + Default>
+where
+    Wall<C>: std::default::Default,
+{
     wall_entity: C,
     global_wall: GlobalWall,
+    sensor: Maybe<Sensor>,
+    active_events: Maybe<ActiveEvents>,
+    rigid_body: RigidBody,
+    friction: Friction,
     #[cfg(feature = "debug")]
     clickable: crate::editor::Clickable,
+}
+
+impl Default for Wall<WallEntity> {
+    fn default() -> Self {
+        Self {
+            wall_entity: WallEntity::default(),
+            global_wall: GlobalWall,
+            sensor: Maybe::default(),
+            active_events: Maybe::default(),
+            rigid_body: RigidBody::Fixed,
+            friction: Friction::new(1.),
+            #[cfg(feature = "debug")]
+            clickable: crate::editor::Clickable::default(),
+        }
+    }
+}
+
+impl Default for Wall<OutOfWorldEntity> {
+    fn default() -> Self {
+        Self {
+            wall_entity: OutOfWorldEntity::default(),
+            global_wall: GlobalWall,
+            sensor: Maybe::new(Sensor),
+            active_events: Maybe::new(ActiveEvents::CONTACT_FORCE_EVENTS),
+            rigid_body: RigidBody::Fixed,
+            friction: Friction::new(1.),
+            #[cfg(feature = "debug")]
+            clickable: crate::editor::Clickable::default(),
+        }
+    }
 }
 
 #[derive(Default, Component)]
@@ -161,28 +200,36 @@ pub fn spawn_wall_collisions(
                     // 2. the colliders will be despawned automatically when levels unload
                     for wall_rect in wall_rects {
                         level
-                            .spawn_empty()
-                            .insert(Collider::cuboid(
-                                (wall_rect.right as f32 - wall_rect.left as f32 + 1.)
-                                    * grid_size as f32
-                                    / 2.,
-                                (wall_rect.top as f32 - wall_rect.bottom as f32 + 1.)
-                                    * grid_size as f32
-                                    / 2.,
-                            ))
-                            .insert(RigidBody::Fixed)
-                            .insert(Friction::new(1.0))
-                            .insert(Transform::from_xyz(
-                                (wall_rect.left + wall_rect.right + 1) as f32 * grid_size as f32
-                                    / 2.,
-                                (wall_rect.bottom + wall_rect.top + 1) as f32 * grid_size as f32
-                                    / 2.,
-                                0.,
-                            ))
-                            .insert(GlobalTransform::default());
+                            // .spawn_empty()
+                            .spawn((
+                                Collider::cuboid(
+                                    (wall_rect.right as f32 - wall_rect.left as f32 + 1.)
+                                        * grid_size as f32
+                                        / 2.,
+                                    (wall_rect.top as f32 - wall_rect.bottom as f32 + 1.)
+                                        * grid_size as f32
+                                        / 2.,
+                                ),
+                                Transform::from_xyz(
+                                    (wall_rect.left + wall_rect.right + 1) as f32
+                                        * grid_size as f32
+                                        / 2.,
+                                    (wall_rect.bottom + wall_rect.top + 1) as f32
+                                        * grid_size as f32
+                                        / 2.,
+                                    0.,
+                                ),
+                                GlobalTransform::default(),
+                            ));
                     }
                 });
             }
         });
+    }
+}
+
+fn read_events(mut events: EventReader<CollisionEvent>) {
+    for event in events.read() {
+        println!("Got Collision Event {event:?}")
     }
 }

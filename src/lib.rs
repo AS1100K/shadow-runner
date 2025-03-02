@@ -9,6 +9,7 @@ pub mod colliders;
 pub mod editor;
 pub mod physics;
 pub mod player;
+pub mod utils;
 pub mod walls;
 
 pub const GRID_SIZE: i32 = 16;
