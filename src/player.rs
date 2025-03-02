@@ -1,66 +1,49 @@
+use crate::colliders::ColliderBundle;
 use bevy::prelude::*;
-use bevy_rapier2d::prelude::*;
+use bevy_ecs_ldtk::prelude::*;
+use bevy_rapier2d::prelude::Velocity;
 
-pub const PLAYER_WIDTH: f32 = 20.;
-pub const PLAYER_HEIGHT: f32 = 100.;
+pub const PLAYER_WIDTH: f32 = 16.;
+pub const PLAYER_HEIGHT: f32 = 32.;
 
-#[derive(Bundle)]
+#[derive(Default, Bundle, LdtkEntity)]
 pub struct Player {
+    #[sprite_sheet]
     pub sprite: Sprite,
-    pub rigid_body: RigidBody,
-    pub locked_axes: LockedAxes,
-    pub collider: Collider,
-    pub velocity: Velocity,
-    pub transform: Transform,
+    #[grid_coords]
+    pub grid_coords: GridCoords,
     pub player_entity: PlayerEntity,
+    #[from_entity_instance]
+    pub collider_bundle: ColliderBundle,
     #[cfg(feature = "debug")]
     pub clickable: crate::editor::Clickable,
 }
 
-impl Player {
-    pub fn new(window_width: f32, _window_height: f32) -> Self {
-        Self {
-            sprite: Sprite {
-                // Red
-                color: Color::hsl(0., 1., 0.5),
-                custom_size: Some(Vec2::new(PLAYER_WIDTH, PLAYER_HEIGHT)),
-                ..Default::default()
-            },
-            rigid_body: RigidBody::Dynamic,
-            locked_axes: LockedAxes::ROTATION_LOCKED,
-            collider: Collider::cuboid(PLAYER_WIDTH / 2., PLAYER_HEIGHT / 2.),
-            velocity: Velocity::linear(Vec2::new(100., 0.)),
-            transform: Transform::from_xyz(-window_width / 2., 0., 0.),
-            player_entity: PlayerEntity,
-            #[cfg(feature = "debug")]
-            clickable: crate::editor::Clickable("Player"),
-        }
-    }
-}
-
-#[derive(Component)]
+#[derive(Default, Component)]
 pub struct PlayerEntity;
 
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, movement);
+        app.register_ldtk_entity::<Player>("Player")
+            .add_systems(Update, player_movement);
     }
 }
 
-fn movement(
-    mut query: Query<&mut Transform, With<PlayerEntity>>,
-    keys: Res<ButtonInput<KeyCode>>,
-    time: Res<Time>,
+// TODO: Fix Infinite Jump
+fn player_movement(
+    input: Res<ButtonInput<KeyCode>>,
+    mut query: Query<&mut Velocity, With<PlayerEntity>>,
 ) {
-    for mut transform in &mut query {
-        // Up/Jump Movement
-        if keys.pressed(KeyCode::KeyW)
-            || keys.pressed(KeyCode::ArrowUp)
-            || keys.pressed(KeyCode::Space)
-        {
-            transform.translation.y += 500. * time.delta_secs();
+    for mut velocity in &mut query {
+        let right = if input.pressed(KeyCode::KeyD) { 1. } else { 0. };
+        let left = if input.pressed(KeyCode::KeyA) { 1. } else { 0. };
+
+        velocity.linvel.x = (right - left) * 200.;
+
+        if input.just_pressed(KeyCode::Space) {
+            velocity.linvel.y = 500.;
         }
     }
 }

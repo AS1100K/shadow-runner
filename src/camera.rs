@@ -1,7 +1,8 @@
 use bevy::prelude::*;
+use bevy_ecs_ldtk::GridCoords;
 use bevy_rapier2d::prelude::*;
 
-use crate::player::PlayerEntity;
+use crate::{player::PlayerEntity, GRID_SIZE};
 
 pub struct MainCameraPlugin;
 
@@ -35,23 +36,32 @@ fn sync_camera(
         &mut Transform,
         (With<MainCamera>, Without<PlayerEntity>),
     >,
-    player_query: Query<&Transform, (With<PlayerEntity>, Without<MainCamera>)>,
+    player_query: Query<Option<&GridCoords>, (With<PlayerEntity>, Without<MainCamera>)>,
 ) {
     #[cfg(feature = "debug")]
     let (mut camera_transform, camera) = camera_query.single_mut();
     #[cfg(not(feature = "debug"))]
     let mut camera_transform = camera_query.single_mut();
 
-    let player_transform = player_query.single();
+    for player_grid_coords in &player_query {
+        let player_translation = if let Some(player_grid_coords) = player_grid_coords {
+            bevy_ecs_ldtk::utils::grid_coords_to_translation(
+                *player_grid_coords,
+                IVec2::splat(GRID_SIZE),
+            )
+        } else {
+            Vec2::new(0., 0.)
+        };
 
-    #[cfg(feature = "debug")]
-    {
-        camera_transform.translation.x = player_transform.translation.x + camera.player_delta;
-    }
+        #[cfg(feature = "debug")]
+        {
+            camera_transform.translation.x = player_translation.x + camera.player_delta;
+        }
 
-    #[cfg(not(feature = "debug"))]
-    {
-        camera_transform.translation.x = player_transform.translation.x;
+        #[cfg(not(feature = "debug"))]
+        {
+            camera_transform.translation.x = player_translation.x;
+        }
     }
 }
 

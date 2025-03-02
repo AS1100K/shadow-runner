@@ -22,7 +22,7 @@ impl Plugin for Editor {
     }
 }
 
-#[derive(Component)]
+#[derive(Default, Component)]
 #[require(Sprite, Transform)]
 pub struct Clickable(pub &'static str);
 

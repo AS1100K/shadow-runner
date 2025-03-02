@@ -1,31 +1,34 @@
 use bevy::prelude::*;
-use player::{Player, PlayerPlugin};
+use bevy_ecs_ldtk::{LdtkWorldBundle, LevelSelection};
+use player::PlayerPlugin;
+use walls::WallPlugin;
 
 pub mod camera;
+pub mod colliders;
 #[cfg(feature = "debug")]
 pub mod editor;
-pub mod levels;
 pub mod physics;
 pub mod player;
+pub mod walls;
+
+pub const GRID_SIZE: i32 = 16;
 
 pub struct EntitySpawnerPlugin;
 
 impl Plugin for EntitySpawnerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_basic)
-            .add_systems(Startup, levels::one::spawn)
+            .add_plugins(WallPlugin)
             .add_plugins(PlayerPlugin);
     }
 }
 
-fn spawn_basic(mut commands: Commands, windows: Query<&Window>) {
-    for window in &windows {
-        let width = window.width();
-        let height = window.height();
-
-        // Create a Player
-        commands.spawn(Player::new(width, height));
-    }
+fn spawn_basic(mut commands: Commands, asset_server: Res<AssetServer>) {
+    // Spawn LDTK Bundle
+    commands.spawn(LdtkWorldBundle {
+        ldtk_handle: asset_server.load("shadow_runner.ldtk").into(),
+        ..default()
+    });
 }
 
 pub struct BasePlugin;
@@ -33,6 +36,8 @@ pub struct BasePlugin;
 impl Plugin for BasePlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(GameState::default())
+            // Current Level Index
+            .insert_resource(LevelSelection::index(0))
             .add_systems(Update, base_game_system)
             .add_plugins(EntitySpawnerPlugin);
     }
