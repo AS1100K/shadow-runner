@@ -21,6 +21,7 @@ pub struct OutOfWorldEntity;
 #[derive(Default, Bundle, LdtkIntCell)]
 pub struct Wall<C: Component + Default> {
     wall_entity: C,
+    global_wall: GlobalWall,
     #[cfg(feature = "debug")]
     clickable: crate::editor::Clickable,
 }
@@ -28,12 +29,15 @@ pub struct Wall<C: Component + Default> {
 #[derive(Default, Component)]
 pub struct WallEntity;
 
+#[derive(Default, Component)]
+pub struct GlobalWall;
+
 // This system is taken from platformer example in `bevy_ecs_ldtk`
 // Code: https://github.com/Trouv/bevy_ecs_ldtk/blob/main/examples/platformer/walls.rs#L32
 pub fn spawn_wall_collisions(
     mut commands: Commands,
-    wall_query: Query<(&GridCoords, &Parent), Or<(Added<WallEntity>, Added<OutOfWorldEntity>)>>,
-    parent_query: Query<&Parent, (Without<WallEntity>, Without<OutOfWorldEntity>)>,
+    wall_query: Query<(&GridCoords, &Parent), Added<GlobalWall>>,
+    parent_query: Query<&Parent, Without<GlobalWall>>,
     level_query: Query<(Entity, &LevelIid)>,
     ldtk_projects: Query<&LdtkProjectHandle>,
     ldtk_project_assets: Res<Assets<LdtkProject>>,
