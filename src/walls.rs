@@ -1,7 +1,4 @@
-use bevy::{
-    prelude::*,
-    utils::{HashMap, HashSet},
-};
+use bevy::{prelude::*, utils::HashMap};
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 
@@ -9,7 +6,7 @@ pub struct WallPlugin;
 
 impl Plugin for WallPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, spawn_wall_collisions)
+        app.add_systems(Update, (spawn_wall_collisions, read_events).chain())
             .register_ldtk_int_cell::<Wall<WallEntity>>(1)
             .register_ldtk_int_cell::<Wall<OutOfWorldEntity>>(2);
     }
@@ -34,7 +31,7 @@ pub struct GlobalWall;
 // Code: https://github.com/Trouv/bevy_ecs_ldtk/blob/main/examples/platformer/walls.rs#L32
 pub fn spawn_wall_collisions(
     mut commands: Commands,
-    wall_query: Query<(&GridCoords, &Parent), Added<GlobalWall>>,
+    wall_query: Query<(&GridCoords, &Parent, Option<&OutOfWorldEntity>), Added<GlobalWall>>,
     parent_query: Query<&Parent, Without<GlobalWall>>,
     level_query: Query<(Entity, &LevelIid)>,
     ldtk_projects: Query<&LdtkProjectHandle>,
@@ -46,6 +43,8 @@ pub fn spawn_wall_collisions(
     struct Plate {
         left: i32,
         right: i32,
+        /// Represents the ID of the IntCell
+        origin: i32,
     }
 
     /// A simple rectangle type representing a wall of any size
@@ -54,6 +53,7 @@ pub fn spawn_wall_collisions(
         right: i32,
         top: i32,
         bottom: i32,
+        origin: i32,
     }
 
     // Consider where the walls are
@@ -63,19 +63,22 @@ pub fn spawn_wall_collisions(
     // This has two consequences in the resulting collision entities:
     // 1. it forces the walls to be split along level boundaries
     // 2. it lets us easily add the collision entities as children of the appropriate level entity
-    let mut level_to_wall_locations: HashMap<Entity, HashSet<GridCoords>> = HashMap::new();
+    let mut level_to_wall_locations: HashMap<Entity, HashMap<GridCoords, i32>> = HashMap::new();
 
-    wall_query.iter().for_each(|(&grid_coords, parent)| {
-        // An intgrid tile's direct parent will be a layer entity, not the level entity
-        // To get the level entity, you need the tile's grandparent.
-        // This is where parent_query comes in.
-        if let Ok(grandparent) = parent_query.get(parent.get()) {
-            level_to_wall_locations
-                .entry(grandparent.get())
-                .or_default()
-                .insert(grid_coords);
-        }
-    });
+    wall_query
+        .iter()
+        .for_each(|(&grid_coords, parent, out_of_world)| {
+            // An intgrid tile's direct parent will be a layer entity, not the level entity
+            // To get the level entity, you need the tile's grandparent.
+            // This is where parent_query comes in.
+            if let Ok(grandparent) = parent_query.get(parent.get()) {
+                let int_cell_id = if out_of_world.is_some() { 2 } else { 1 };
+                level_to_wall_locations
+                    .entry(grandparent.get())
+                    .or_default()
+                    .insert(grid_coords, int_cell_id);
+            }
+        });
 
     if !wall_query.is_empty() {
         level_query.iter().for_each(|(level_entity, level_iid)| {
@@ -105,15 +108,32 @@ pub fn spawn_wall_collisions(
 
                     // + 1 to the width so the algorithm "terminates" plates that touch the right edge
                     for x in 0..width + 1 {
-                        match (plate_start, level_walls.contains(&GridCoords { x, y })) {
-                            (Some(s), false) => {
+                        let grid_coords = GridCoords { x, y };
+                        let int_cell_here = level_walls.get(&grid_coords).copied();
+
+                        match (plate_start, int_cell_here) {
+                            (Some((_s, current_id)), Some(id)) if id == current_id => {
+                                // Do nothing, continuing current plate
+                            }
+                            (Some((s, current_id)), Some(id)) if id != current_id => {
                                 row_plates.push(Plate {
                                     left: s,
                                     right: x - 1,
+                                    origin: current_id,
+                                });
+                                plate_start = Some((x, id));
+                            }
+                            (Some((s, current_id)), None) => {
+                                row_plates.push(Plate {
+                                    left: s,
+                                    right: x - 1,
+                                    origin: current_id,
                                 });
                                 plate_start = None;
                             }
-                            (None, true) => plate_start = Some(x),
+                            (None, Some(id)) => {
+                                plate_start = Some((x, id));
+                            }
                             _ => (),
                         }
                     }
@@ -147,6 +167,7 @@ pub fn spawn_wall_collisions(
                                 top: y as i32,
                                 left: plate.left,
                                 right: plate.right,
+                                origin: plate.origin,
                             });
                     }
                     prev_row = current_row;
@@ -158,8 +179,8 @@ pub fn spawn_wall_collisions(
                     // 1. Adjusts the transforms to be relative to the level for free
                     // 2. the colliders will be despawned automatically when levels unload
                     for wall_rect in wall_rects {
-                        level
-                            .spawn_empty()
+                        let mut entity = level.spawn_empty();
+                        entity
                             .insert(Collider::cuboid(
                                 (wall_rect.right as f32 - wall_rect.left as f32 + 1.)
                                     * grid_size as f32
@@ -178,9 +199,20 @@ pub fn spawn_wall_collisions(
                                 0.,
                             ))
                             .insert(GlobalTransform::default());
+
+                        if wall_rect.origin == 2 {
+                            // entity.insert(Sensor);
+                            entity.insert(ActiveEvents::COLLISION_EVENTS);
+                        }
                     }
                 });
             }
         });
+    }
+}
+
+fn read_events(mut collision_events: EventReader<CollisionEvent>) {
+    for collision_event in collision_events.read() {
+        log::info!("Received collision event: {:?}", collision_event);
     }
 }
