@@ -43,7 +43,7 @@ fn player_movement(
         velocity.linvel.x = (right - left) * 200.;
 
         if input.just_pressed(KeyCode::Space) {
-            velocity.linvel.y = 500.;
+            velocity.linvel.y = 400.;
         }
     }
 }

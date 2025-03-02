@@ -10,13 +10,17 @@ pub struct WallPlugin;
 impl Plugin for WallPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, spawn_wall_collisions)
-            .register_ldtk_int_cell::<Wall>(1);
+            .register_ldtk_int_cell::<Wall<WallEntity>>(1)
+            .register_ldtk_int_cell::<Wall<OutOfWorldEntity>>(2);
     }
 }
 
+#[derive(Default, Component)]
+pub struct OutOfWorldEntity;
+
 #[derive(Default, Bundle, LdtkIntCell)]
-pub struct Wall {
-    wall_entity: WallEntity,
+pub struct Wall<C: Component + Default> {
+    wall_entity: C,
     #[cfg(feature = "debug")]
     clickable: crate::editor::Clickable,
 }
@@ -28,8 +32,8 @@ pub struct WallEntity;
 // Code: https://github.com/Trouv/bevy_ecs_ldtk/blob/main/examples/platformer/walls.rs#L32
 pub fn spawn_wall_collisions(
     mut commands: Commands,
-    wall_query: Query<(&GridCoords, &Parent), Added<WallEntity>>,
-    parent_query: Query<&Parent, Without<WallEntity>>,
+    wall_query: Query<(&GridCoords, &Parent), Or<(Added<WallEntity>, Added<OutOfWorldEntity>)>>,
+    parent_query: Query<&Parent, (Without<WallEntity>, Without<OutOfWorldEntity>)>,
     level_query: Query<(Entity, &LevelIid)>,
     ldtk_projects: Query<&LdtkProjectHandle>,
     ldtk_project_assets: Res<Assets<LdtkProject>>,
