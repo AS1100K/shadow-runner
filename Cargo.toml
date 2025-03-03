@@ -13,3 +13,10 @@ bevy_ecs_ldtk = "0.11"
 bevy_asset_loader = "0.22"
 better_default = "1"
 log = { version = "*", features = ["max_level_debug", "release_max_level_warn"] }
+
+[profile.release]
+lto = true
+opt-level = 3
+codegen-units = 1
+incremental = false
+debug = false
