@@ -1,4 +1,4 @@
-use crate::colliders::ColliderBundle;
+use crate::{assets::AssetsLoadingState, colliders::ColliderBundle};
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::Velocity;
@@ -24,8 +24,10 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.register_ldtk_entity::<Player>("Player")
-            .add_systems(Update, player_movement);
+        app.register_ldtk_entity::<Player>("Player").add_systems(
+            Update,
+            player_movement.run_if(in_state(AssetsLoadingState::Loaded)),
+        );
     }
 }
 
