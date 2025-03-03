@@ -1,5 +1,5 @@
 use super::despawn_screen;
-use crate::{GameState, DEFAULT_FONT_PATH};
+use crate::{assets::*, GameState};
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
@@ -26,9 +26,13 @@ pub struct OnGameOverScreen;
 pub struct RestartGameButton;
 
 // TODO: Hover Effect
-fn spawn_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let font = asset_server.load(DEFAULT_FONT_PATH);
-    let reset_icon = asset_server.load("icons/icon_reset.png");
+fn spawn_screen(
+    mut commands: Commands,
+    font_assets: Res<FontAssets>,
+    icon_assets: Res<IconsAssets>,
+) {
+    let font = &font_assets.default_font;
+    let reset_icon = &icon_assets.reset_icon;
 
     commands
         .spawn((
@@ -92,7 +96,7 @@ fn spawn_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
                                     ..default()
                                 })
                                 .with_child(ImageNode {
-                                    image: reset_icon,
+                                    image: reset_icon.clone(),
                                     ..default()
                                 });
 

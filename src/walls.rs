@@ -2,15 +2,20 @@ use bevy::{prelude::*, utils::HashMap};
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::{player::PlayerEntity, GameState};
+use crate::{assets::AssetsLoadingState, player::PlayerEntity, GameState};
 
 pub struct WallPlugin;
 
 impl Plugin for WallPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (spawn_wall_collisions, read_events).chain())
-            .register_ldtk_int_cell::<Wall<WallEntity>>(1)
-            .register_ldtk_int_cell::<Wall<OutOfWorldEntity>>(2);
+        app.add_systems(
+            Update,
+            (spawn_wall_collisions, read_events)
+                .chain()
+                .run_if(in_state(AssetsLoadingState::Loaded)),
+        )
+        .register_ldtk_int_cell::<Wall<WallEntity>>(1)
+        .register_ldtk_int_cell::<Wall<OutOfWorldEntity>>(2);
     }
 }
 

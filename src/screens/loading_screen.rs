@@ -10,10 +10,6 @@ impl Plugin for LoadingPlugin {
             .add_systems(
                 OnExit(GameState::LoadingScreen),
                 despawn_screen::<OnLoadingScreen>,
-            )
-            .add_systems(
-                Update,
-                start_game.run_if(in_state(GameState::LoadingScreen)),
             );
     }
 }
@@ -38,18 +34,12 @@ fn spawn_screen(mut commands: Commands) {
         ))
         .with_children(|parent| {
             parent.spawn((
-                Text::new("Loading...\nPress Enter to Start"),
+                Text::new("Loading..."),
                 TextColor(Color::hsl(0., 1., 0.5)),
+                TextFont {
+                    font_size: 100.,
+                    ..default()
+                },
             ));
         });
-}
-
-// This doesn't belong in loading screen
-fn start_game(
-    inputs: Res<ButtonInput<KeyCode>>,
-    mut next_game_state: ResMut<NextState<GameState>>,
-) {
-    if inputs.pressed(KeyCode::Enter) {
-        next_game_state.set(GameState::PlayingScreen);
-    }
 }
