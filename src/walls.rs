@@ -211,7 +211,9 @@ pub fn spawn_wall_collisions(
     }
 }
 
-fn read_events(mut collision_events: EventReader<CollisionEvent>) {
+fn read_events(
+    mut collision_events: EventReader<CollisionEvent>
+) {
     for collision_event in collision_events.read() {
         log::info!("Received collision event: {:?}", collision_event);
     }
