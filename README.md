@@ -2,17 +2,9 @@
 
 A WIP Game for [Code for a Cause](https://itch.io/jam/code-for-a-cause)
 
-## Development for WASM
+## Development
 
-1. Make sure you have installed [wasm-server-runner](https://github.com/jakobhellermann/wasm-server-runner) tool.
-    ```bash
-    $ cargo install wasm-server-runner
-    ```
-
-2. Run the Game:
-    ```bash
-    $ cargo run --features debug --target wasm32-unknown-unknown
-    ```
+Run `./run.sh` for more info
 
 ## TODOs
 
