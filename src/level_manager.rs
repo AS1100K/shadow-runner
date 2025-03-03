@@ -9,7 +9,7 @@ impl Plugin for LevelManager {
     fn build(&self, app: &mut App) {
         app.add_systems(
             OnTransition {
-                exited: GameState::MainMenuScreen,
+                exited: GameState::LevelsMenuScreen,
                 entered: GameState::PlayingScreen,
             },
             load_level,

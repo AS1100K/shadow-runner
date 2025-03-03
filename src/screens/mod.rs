@@ -1,9 +1,11 @@
 use bevy::prelude::*;
 use game_over_screen::GameOverPlugin;
+use levels_menu_screen::LevelsMenuPlugin;
 use main_menu_screen::MainMenuPlugin;
 use pause_screen::PausePlugin;
 
 pub mod game_over_screen;
+pub mod levels_menu_screen;
 pub mod loading_screen;
 pub mod main_menu_screen;
 pub mod pause_screen;
@@ -14,7 +16,8 @@ impl Plugin for ScreensPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(PausePlugin)
             .add_plugins(MainMenuPlugin)
-            .add_plugins(GameOverPlugin);
+            .add_plugins(GameOverPlugin)
+            .add_plugins(LevelsMenuPlugin);
     }
 }
 

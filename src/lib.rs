@@ -62,6 +62,7 @@ pub enum GameState {
     #[default]
     LoadingScreen,
     MainMenuScreen,
+    LevelsMenuScreen,
     PlayingScreen,
 }
 
