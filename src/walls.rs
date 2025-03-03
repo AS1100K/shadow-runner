@@ -22,8 +22,6 @@ pub struct OutOfWorldEntity;
 pub struct Wall<C: Component + Default> {
     wall_entity: C,
     global_wall: GlobalWall,
-    #[cfg(feature = "debug")]
-    clickable: crate::editor::Clickable,
 }
 
 #[derive(Default, Component)]

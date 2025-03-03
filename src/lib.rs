@@ -5,8 +5,6 @@ use walls::WallPlugin;
 
 pub mod camera;
 pub mod colliders;
-#[cfg(feature = "debug")]
-pub mod editor;
 pub mod physics;
 pub mod player;
 pub mod walls;

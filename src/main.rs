@@ -22,8 +22,5 @@ fn main() {
     app.add_plugins(PhysicsPlugin);
     app.add_plugins(MainCameraPlugin);
 
-    #[cfg(feature = "debug")]
-    app.add_plugins(shadow_runner::editor::Editor);
-
     app.run();
 }

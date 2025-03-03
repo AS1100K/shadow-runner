@@ -9,23 +9,18 @@ impl Plugin for MainCameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_camera)
             .add_systems(Update, sync_camera);
-
-        #[cfg(feature = "debug")]
-        app.add_systems(Update, camera_movement);
     }
 }
 
 #[derive(Component, Default)]
 #[require(Camera2d, Transform, Velocity)]
-pub struct MainCamera {
-    #[cfg(feature = "debug")]
-    player_delta: f32,
-}
+pub struct MainCamera;
 
 fn spawn_camera(mut commands: Commands) {
-    commands.spawn(MainCamera::default());
+    commands.spawn(MainCamera);
 }
 
+#[allow(clippy::type_complexity)]
 fn sync_camera(
     mut camera_query: Query<
         (&mut Transform, &mut OrthographicProjection),
@@ -87,46 +82,6 @@ fn sync_camera(
                 camera_transform.translation.x += level_transform.translation.x;
                 camera_transform.translation.y += level_transform.translation.y;
             }
-        }
-    }
-}
-
-#[cfg(feature = "debug")]
-fn camera_movement(
-    mut query: Query<(&mut Transform, &mut MainCamera, &mut OrthographicProjection)>,
-    keys: Res<ButtonInput<KeyCode>>,
-    time: Res<Time<bevy::prelude::Real>>,
-) {
-    for (mut camera_transform, mut main_camera, mut orthographic_projection) in &mut query {
-        if keys.pressed(KeyCode::Numpad6) || keys.all_pressed([KeyCode::AltLeft, KeyCode::KeyD]) {
-            main_camera.player_delta += 500. * time.delta_secs();
-        }
-
-        if keys.pressed(KeyCode::Numpad8) || keys.all_pressed([KeyCode::AltLeft, KeyCode::KeyW]) {
-            camera_transform.translation.y += 500. * time.delta_secs();
-        }
-
-        if keys.pressed(KeyCode::Numpad4) || keys.all_pressed([KeyCode::AltLeft, KeyCode::KeyA]) {
-            main_camera.player_delta -= 500. * time.delta_secs();
-        }
-
-        if keys.pressed(KeyCode::Numpad2) || keys.all_pressed([KeyCode::AltLeft, KeyCode::KeyS]) {
-            camera_transform.translation.y -= 500. * time.delta_secs();
-        }
-
-        if keys.just_pressed(KeyCode::Numpad5)
-            || keys.all_pressed([KeyCode::AltLeft, KeyCode::Space])
-        {
-            main_camera.player_delta = 0.;
-            camera_transform.translation.y = 0.;
-        }
-
-        if keys.just_pressed(KeyCode::NumpadAdd) {
-            orthographic_projection.scale -= 0.1;
-        }
-
-        if keys.just_pressed(KeyCode::NumpadSubtract) {
-            orthographic_projection.scale += 0.1;
         }
     }
 }

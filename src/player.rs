@@ -15,8 +15,6 @@ pub struct Player {
     pub player_entity: PlayerEntity,
     #[from_entity_instance]
     pub collider_bundle: ColliderBundle,
-    #[cfg(feature = "debug")]
-    pub clickable: crate::editor::Clickable,
 }
 
 #[derive(Default, Component)]
