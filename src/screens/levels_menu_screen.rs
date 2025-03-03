@@ -1,5 +1,9 @@
 use super::despawn_screen;
-use crate::GameState;
+use crate::{
+    assets::FontAssets,
+    level_manager::{AllLevels, CurrentLevelInfo},
+    GameState,
+};
 use bevy::prelude::*;
 
 pub struct LevelsMenuPlugin;
@@ -13,7 +17,7 @@ impl Plugin for LevelsMenuPlugin {
             )
             .add_systems(
                 Update,
-                start_game.run_if(in_state(GameState::LevelsMenuScreen)),
+                choose_level.run_if(in_state(GameState::LevelsMenuScreen)),
             );
     }
 }
@@ -21,7 +25,13 @@ impl Plugin for LevelsMenuPlugin {
 #[derive(Component)]
 pub struct OnLevelMenuScreen;
 
-fn spawn_screen(mut commands: Commands) {
+#[derive(Component)]
+pub struct LevelButton {
+    level_id: i32,
+}
+
+fn spawn_screen(mut commands: Commands, all_levels: Res<AllLevels>, font_assets: Res<FontAssets>) {
+    let font = &font_assets.default_font;
     commands
         .spawn((
             OnLevelMenuScreen,
@@ -30,7 +40,9 @@ fn spawn_screen(mut commands: Commands) {
                 height: Val::Percent(100.0),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
+                flex_direction: FlexDirection::Column,
                 position_type: PositionType::Absolute,
+                row_gap: Val::Px(100.),
                 left: Val::Px(0.),
                 top: Val::Px(0.),
                 ..default()
@@ -38,18 +50,76 @@ fn spawn_screen(mut commands: Commands) {
         ))
         .with_children(|parent| {
             parent.spawn((
-                Text::new("Level Menu\nThis Page needs to be Designed\nJust Press Enter for now"),
-                TextColor(Color::hsl(0., 1., 0.5)),
+                Text::new("Choose Level"),
+                TextColor(Color::hsl(31., 0.72, 0.46)),
+                TextFont {
+                    font: font.clone(),
+                    font_size: 100.,
+                    ..default()
+                },
             ));
+
+            // Spawn Grid
+            parent
+                .spawn(Node {
+                    display: Display::Grid,
+                    grid_template_columns: vec![
+                        GridTrack::px(100.),
+                        GridTrack::px(100.),
+                        GridTrack::px(100.),
+                        GridTrack::px(100.),
+                    ],
+                    grid_auto_rows: vec![
+                        GridTrack::px(100.),
+                        GridTrack::px(100.),
+                        GridTrack::px(100.),
+                    ],
+                    row_gap: Val::Px(50.),
+                    column_gap: Val::Px(50.),
+                    ..default()
+                })
+                .with_children(|parent| {
+                    for level in &all_levels.all_levels {
+                        parent
+                            .spawn((
+                                Button,
+                                LevelButton {
+                                    level_id: level.0.clone(),
+                                },
+                                Node {
+                                    width: Val::Px(100.),
+                                    height: Val::Px(100.),
+                                    align_items: AlignItems::Center,
+                                    justify_content: JustifyContent::Center,
+                                    ..default()
+                                },
+                                BackgroundColor(Color::hsl(31., 0.72, 0.46)),
+                            ))
+                            .with_child((
+                                Text::new(format!("{}", level.0)),
+                                TextColor(Color::WHITE),
+                                TextFont {
+                                    font: font.clone(),
+                                    font_size: 33.,
+                                    ..default()
+                                },
+                            ));
+                    }
+                });
         });
 }
 
-// This doesn't belong in levels menu screen
-fn start_game(
-    inputs: Res<ButtonInput<KeyCode>>,
+fn choose_level(
+    button_query: Query<(&Interaction, &LevelButton), (With<Button>, Changed<Interaction>)>,
+    mut current_level_info: ResMut<CurrentLevelInfo>,
     mut next_game_state: ResMut<NextState<GameState>>,
 ) {
-    if inputs.pressed(KeyCode::Enter) {
-        next_game_state.set(GameState::PlayingScreen);
+    for (interaction, level_button) in &button_query {
+        if Interaction::Pressed == *interaction {
+            current_level_info.current_level_id = level_button.level_id;
+            next_game_state.set(GameState::PlayingScreen);
+
+            return;
+        }
     }
 }

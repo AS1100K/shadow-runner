@@ -12,14 +12,16 @@ Run `./run.sh` for more info
 - [ ] Game Screens
     - [ ] Start Screen/Main menu
         - [x] Mechanism
-        - [ ] Design
+        - [ ] Design _Partially Completed_
     - [ ] Game Pause
         - [x] Mechanism
         - [ ] Design
     - [x] Game Over
     - [ ] Level Selector/Level Menu
-    - [x] Loading Screen
-        _BUG: Not Rendering_
+        - [x] Mechanism
+        - [ ] Design _Partially Completed_
+    - [x] Loading Screen _BUG: Not Rendering_
+    - [ ] Settings Screen
 - [ ] Level Design (Parkour, etc.)
 - [ ] Score System
 - [ ] Player
