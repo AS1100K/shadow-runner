@@ -2,7 +2,9 @@ use bevy::{prelude::*, utils::HashMap};
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::{assets::AssetsLoadingState, player::PlayerEntity, GameState};
+use crate::{
+    assets::AssetsLoadingState, level_manager::CurrentLevelInfo, player::PlayerEntity, GameState,
+};
 
 pub struct WallPlugin;
 
@@ -10,37 +12,53 @@ impl Plugin for WallPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (spawn_wall_collisions, read_events)
+            (spawn_wall_collisions, read_out_of_world_collisions)
                 .chain()
                 .run_if(in_state(AssetsLoadingState::Loaded)),
         )
         .register_ldtk_int_cell::<Wall<WallEntity>>(1)
-        .register_ldtk_int_cell::<Wall<OutOfWorldEntity>>(2);
+        .register_ldtk_int_cell::<Wall<OutOfWorldEntity>>(2)
+        .register_ldtk_int_cell::<Wall<NextLevelEntity>>(3);
     }
+}
+
+#[derive(Default, Bundle, LdtkIntCell)]
+pub struct Wall<C: Component + Default> {
+    wall_entity: C,
+    global_wall: GlobalWallEntity,
 }
 
 #[derive(Default, Component)]
 pub struct OutOfWorldEntity;
 
-#[derive(Default, Bundle, LdtkIntCell)]
-pub struct Wall<C: Component + Default> {
-    wall_entity: C,
-    global_wall: GlobalWall,
-}
-
 #[derive(Default, Component)]
 pub struct WallEntity;
 
 #[derive(Default, Component)]
-pub struct GlobalWall;
+pub struct NextLevelEntity;
+
+#[derive(Default, Component)]
+pub struct GlobalWallEntity;
+
+#[derive(Default, Component)]
+pub struct NextLevelTrigger;
 
 // This system is inspired from platformer example in `bevy_ecs_ldtk` and is modified
 // to add specific components based on which IntCell was that wall of.
 // Code: https://github.com/Trouv/bevy_ecs_ldtk/blob/main/examples/platformer/walls.rs#L32
+#[allow(clippy::type_complexity)]
 pub fn spawn_wall_collisions(
     mut commands: Commands,
-    wall_query: Query<(&GridCoords, &Parent, Option<&OutOfWorldEntity>), Added<GlobalWall>>,
-    parent_query: Query<&Parent, Without<GlobalWall>>,
+    wall_query: Query<
+        (
+            &GridCoords,
+            &Parent,
+            Option<&OutOfWorldEntity>,
+            Option<&NextLevelEntity>,
+        ),
+        Added<GlobalWallEntity>,
+    >,
+    parent_query: Query<&Parent, Without<GlobalWallEntity>>,
     level_query: Query<(Entity, &LevelIid)>,
     ldtk_projects: Query<&LdtkProjectHandle>,
     ldtk_project_assets: Res<Assets<LdtkProject>>,
@@ -75,12 +93,17 @@ pub fn spawn_wall_collisions(
 
     wall_query
         .iter()
-        .for_each(|(&grid_coords, parent, out_of_world)| {
+        .for_each(|(&grid_coords, parent, out_of_world, next_level_entity)| {
             // An intgrid tile's direct parent will be a layer entity, not the level entity
             // To get the level entity, you need the tile's grandparent.
             // This is where parent_query comes in.
             if let Ok(grandparent) = parent_query.get(parent.get()) {
-                let int_cell_id = if out_of_world.is_some() { 2 } else { 1 };
+                let int_cell_id = match (out_of_world, next_level_entity) {
+                    (Some(_), None) => 2,
+                    (None, Some(_)) => 3,
+                    (None, None) => 1,
+                    _ => 3,
+                };
                 level_to_wall_locations
                     .entry(grandparent.get())
                     .or_default()
@@ -208,9 +231,12 @@ pub fn spawn_wall_collisions(
                             ))
                             .insert(GlobalTransform::default());
 
-                        if wall_rect.origin == 2 {
-                            // entity.insert(Sensor);
+                        if wall_rect.origin == 2 | 3 {
                             entity.insert(ActiveEvents::COLLISION_EVENTS);
+                        }
+
+                        if wall_rect.origin == 3 {
+                            entity.insert(NextLevelTrigger);
                         }
                     }
                 });
@@ -219,17 +245,23 @@ pub fn spawn_wall_collisions(
     }
 }
 
-fn read_events(
+fn read_out_of_world_collisions(
     mut collision_events: EventReader<CollisionEvent>,
     player_query: Query<Entity, With<PlayerEntity>>,
+    next_level_trigger_query: Query<Entity, With<NextLevelTrigger>>,
+    mut current_level_info: ResMut<CurrentLevelInfo>,
     mut next_game_state: ResMut<NextState<GameState>>,
     mut time: ResMut<Time<Virtual>>,
 ) {
     for collision_event in collision_events.read() {
-        if let &CollisionEvent::Started(starting_entity, ..) = collision_event {
+        if let &CollisionEvent::Started(starting_entity, colliding_entity, ..) = collision_event {
             let player_entity = player_query.single();
+            let next_level_trigger_entity = next_level_trigger_query.single();
 
-            if starting_entity == player_entity {
+            if starting_entity == player_entity && colliding_entity == next_level_trigger_entity {
+                // Next Level
+                current_level_info.current_level_id += 1;
+            } else {
                 // Game Over...
                 next_game_state.set(GameState::GameOverScreen);
                 time.pause();

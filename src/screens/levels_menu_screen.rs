@@ -83,9 +83,7 @@ fn spawn_screen(mut commands: Commands, all_levels: Res<AllLevels>, font_assets:
                         parent
                             .spawn((
                                 Button,
-                                LevelButton {
-                                    level_id: level.0.clone(),
-                                },
+                                LevelButton { level_id: *level.0 },
                                 Node {
                                     width: Val::Px(100.),
                                     height: Val::Px(100.),
@@ -109,6 +107,7 @@ fn spawn_screen(mut commands: Commands, all_levels: Res<AllLevels>, font_assets:
         });
 }
 
+#[allow(clippy::type_complexity)]
 fn choose_level(
     button_query: Query<(&Interaction, &LevelButton), (With<Button>, Changed<Interaction>)>,
     mut current_level_info: ResMut<CurrentLevelInfo>,
