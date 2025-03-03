@@ -9,8 +9,17 @@ Run `./run.sh` for more info
 ## TODOs
 
 - [x] Basic Bevy Template
-- [ ] Game Screen (like Start, Pause, Keys menu)
-    - [x] Game Pause Mechanism
+- [ ] Game Screens
+    - [ ] Start Screen/Main menu
+        - [x] Mechanism
+        - [ ] Design
+    - [ ] Game Pause
+        - [x] Mechanism
+        - [ ] Design
+    - [x] Game Over
+    - [ ] Level Selector/Level Menu
+    - [x] Loading Screen
+        _BUG: Not Rendering_
 - [ ] Level Design (Parkour, etc.)
 - [ ] Score System
 - [ ] Player
