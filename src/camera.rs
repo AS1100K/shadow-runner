@@ -32,7 +32,7 @@ fn sync_camera(
         (Without<OrthographicProjection>, Without<PlayerEntity>),
     >,
     ldtk_projects: Query<&LdtkProjectHandle>,
-    level_selection: Res<LevelSelection>,
+    level_selection: Option<Res<LevelSelection>>,
     ldtk_project_assets: Res<Assets<LdtkProject>>,
 ) {
     if let Ok(Transform {
@@ -52,6 +52,10 @@ fn sync_camera(
             let level = ldtk_project
                 .get_raw_level_by_iid(&level_iid.to_string())
                 .expect("Spawned level should exist in LDtk Project");
+
+            let Some(level_selection) = level_selection.as_ref() else {
+                return;
+            };
 
             if level_selection.is_match(&LevelIndices::default(), level) {
                 let level_ratio = level.px_wid as f32 / level.px_hei as f32;

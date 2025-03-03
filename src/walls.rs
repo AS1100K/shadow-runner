@@ -2,6 +2,8 @@ use bevy::{prelude::*, utils::HashMap};
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 
+use crate::{player::PlayerEntity, GameState};
+
 pub struct WallPlugin;
 
 impl Plugin for WallPlugin {
@@ -27,7 +29,8 @@ pub struct WallEntity;
 #[derive(Default, Component)]
 pub struct GlobalWall;
 
-// This system is taken from platformer example in `bevy_ecs_ldtk`
+// This system is inspired from platformer example in `bevy_ecs_ldtk` and is modified
+// to add specific components based on which IntCell was that wall of.
 // Code: https://github.com/Trouv/bevy_ecs_ldtk/blob/main/examples/platformer/walls.rs#L32
 pub fn spawn_wall_collisions(
     mut commands: Commands,
@@ -211,8 +214,21 @@ pub fn spawn_wall_collisions(
     }
 }
 
-fn read_events(mut collision_events: EventReader<CollisionEvent>) {
+fn read_events(
+    mut collision_events: EventReader<CollisionEvent>,
+    player_query: Query<Entity, With<PlayerEntity>>,
+    mut next_game_state: ResMut<NextState<GameState>>,
+    mut time: ResMut<Time<Virtual>>,
+) {
     for collision_event in collision_events.read() {
-        log::info!("Received collision event: {:?}", collision_event);
+        if let &CollisionEvent::Started(starting_entity, ..) = collision_event {
+            let player_entity = player_query.single();
+
+            if starting_entity == player_entity {
+                // Game Over...
+                next_game_state.set(GameState::GameOverScreen);
+                time.pause();
+            }
+        };
     }
 }
