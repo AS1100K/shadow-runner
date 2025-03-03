@@ -1,8 +1,7 @@
+use crate::{player::PlayerEntity, ASPECT_RATIO};
 use bevy::prelude::*;
-use bevy_ecs_ldtk::GridCoords;
+use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
-
-use crate::{player::PlayerEntity, GRID_SIZE};
 
 pub struct MainCameraPlugin;
 
@@ -28,39 +27,66 @@ fn spawn_camera(mut commands: Commands) {
 }
 
 fn sync_camera(
-    #[cfg(feature = "debug")] mut camera_query: Query<
-        (&mut Transform, &MainCamera),
-        Without<PlayerEntity>,
-    >,
-    #[cfg(not(feature = "debug"))] mut camera_query: Query<
-        &mut Transform,
+    mut camera_query: Query<
+        (&mut Transform, &mut OrthographicProjection),
         (With<MainCamera>, Without<PlayerEntity>),
     >,
-    player_query: Query<Option<&GridCoords>, (With<PlayerEntity>, Without<MainCamera>)>,
+    player_query: Query<&Transform, With<PlayerEntity>>,
+    level_query: Query<
+        (&Transform, &LevelIid),
+        (Without<OrthographicProjection>, Without<PlayerEntity>),
+    >,
+    ldtk_projects: Query<&LdtkProjectHandle>,
+    level_selection: Res<LevelSelection>,
+    ldtk_project_assets: Res<Assets<LdtkProject>>,
 ) {
-    #[cfg(feature = "debug")]
-    let (mut camera_transform, camera) = camera_query.single_mut();
-    #[cfg(not(feature = "debug"))]
-    let mut camera_transform = camera_query.single_mut();
+    if let Ok(Transform {
+        translation: player_translation,
+        ..
+    }) = player_query.get_single()
+    {
+        let player_translation = *player_translation;
 
-    for player_grid_coords in &player_query {
-        let player_translation = if let Some(player_grid_coords) = player_grid_coords {
-            bevy_ecs_ldtk::utils::grid_coords_to_translation(
-                *player_grid_coords,
-                IVec2::splat(GRID_SIZE),
-            )
-        } else {
-            Vec2::new(0., 0.)
-        };
+        let (mut camera_transform, mut orthographic_projection) = camera_query.single_mut();
 
-        #[cfg(feature = "debug")]
-        {
-            camera_transform.translation.x = player_translation.x + camera.player_delta;
-        }
+        for (level_transform, level_iid) in &level_query {
+            let ldtk_project = ldtk_project_assets
+                .get(ldtk_projects.single())
+                .expect("Project should be loaded if level has spawned");
 
-        #[cfg(not(feature = "debug"))]
-        {
-            camera_transform.translation.x = player_translation.x;
+            let level = ldtk_project
+                .get_raw_level_by_iid(&level_iid.to_string())
+                .expect("Spawned level should exist in LDtk Project");
+
+            if level_selection.is_match(&LevelIndices::default(), level) {
+                let level_ratio = level.px_wid as f32 / level.px_hei as f32;
+                orthographic_projection.viewport_origin = Vec2::ZERO;
+
+                if level_ratio > ASPECT_RATIO {
+                    // level is wider than the screen
+                    let height = (level.px_hei as f32 / 9.).round() * 9.;
+                    let width = height * ASPECT_RATIO;
+                    orthographic_projection.scaling_mode =
+                        bevy::render::camera::ScalingMode::Fixed { width, height };
+                    camera_transform.translation.x =
+                        (player_translation.x - level_transform.translation.x - width / 2.)
+                            .clamp(0., level.px_wid as f32 - width);
+                    camera_transform.translation.y = 0.;
+                } else {
+                    // level is taller than the screen
+                    let width = (level.px_wid as f32 / 16.).round() * 16.;
+                    let height = width / ASPECT_RATIO;
+                    orthographic_projection.scaling_mode =
+                        bevy::render::camera::ScalingMode::Fixed { width, height };
+                    camera_transform.translation.y =
+                        (player_translation.y - level_transform.translation.y - height / 2.)
+                            .clamp(0., level.px_hei as f32 - height);
+                    camera_transform.translation.x = 0.;
+                }
+
+                camera_transform.translation.x += level_transform.translation.x;
+                camera_transform.translation.y += level_transform.translation.y;
+            }
         }
     }
 }

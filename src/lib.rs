@@ -12,6 +12,7 @@ pub mod player;
 pub mod walls;
 
 pub const GRID_SIZE: i32 = 16;
+pub const ASPECT_RATIO: f32 = 16. / 9.;
 
 pub struct EntitySpawnerPlugin;
 
