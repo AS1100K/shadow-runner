@@ -28,6 +28,19 @@ jobs:
       - uses: actions/checkout@v4
         with:
           lfs: ${{ env.use_git_lfs }}
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          # this might remove tools that are actually needed,
+          # if set to "true" but frees about 6 GB
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          # do not remove large-packages, as it is necessary
+          large-packages: false
+          docker-images: true
+          swap-storage: true
       - uses: rs-workspace/rust-toolchain@v0.2.0
       - name: Install Rust Toolchain for WASM
         run: rustup target install wasm32-unknown-unknown
@@ -76,6 +89,19 @@ jobs:
       - uses: actions/checkout@v4
         with:
           lfs: ${{ env.use_git_lfs }}
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          # this might remove tools that are actually needed,
+          # if set to "true" but frees about 6 GB
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          # do not remove large-packages, as it is necessary
+          large-packages: false
+          docker-images: true
+          swap-storage: true
       - uses: rs-workspace/rust-toolchain@v0.2.0
       - name: install dependencies
         run: |
