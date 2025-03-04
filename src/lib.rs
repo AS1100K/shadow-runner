@@ -1,9 +1,12 @@
+use std::time::{Duration, Instant};
+
 use assets::AssetsManagerPlugin;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::LdtkWorldBundle;
 use level_manager::LevelManager;
 use player::PlayerPlugin;
 use screens::ScreensPlugin;
+use tutorial::GameTutorialPlugin;
 use walls::WallPlugin;
 
 pub mod assets;
@@ -13,6 +16,7 @@ pub mod level_manager;
 pub mod physics;
 pub mod player;
 pub mod screens;
+pub mod tutorial;
 pub mod walls;
 
 pub const GRID_SIZE: i32 = 16;
@@ -45,13 +49,13 @@ impl Plugin for BasePlugin {
             .add_plugins(AssetsManagerPlugin)
             .add_plugins(ScreensPlugin)
             .add_plugins(LevelManager)
-            // Current Level Index
-            // .insert_resource(LevelSelection::index(0))
+            .add_plugins(GameTutorialPlugin)
+            .add_plugins(EntitySpawnerPlugin)
             .add_systems(
                 Update,
                 base_game_system.run_if(in_state(assets::AssetsLoadingState::Loaded)),
             )
-            .add_plugins(EntitySpawnerPlugin);
+            .add_systems(Update, auto_despawn_system);
     }
 }
 
@@ -83,6 +87,44 @@ fn base_game_system(
                 next_game_state.set(GameState::PauseScreen);
             }
             _ => {}
+        }
+    }
+}
+
+#[derive(Component, better_default::Default)]
+#[default(instant: Instant::now(), duration: Duration::from_secs(2), recursive_despawn: true)]
+pub struct AutoDespawn {
+    instant: Instant,
+    duration: Duration,
+    recursive_despawn: bool,
+}
+
+impl AutoDespawn {
+    pub fn new(duration: Duration) -> Self {
+        Self {
+            instant: Instant::now(),
+            duration,
+            recursive_despawn: false,
+        }
+    }
+
+    pub fn new_recursive_despawn(duration: Duration) -> Self {
+        Self {
+            instant: Instant::now(),
+            duration,
+            recursive_despawn: true,
+        }
+    }
+}
+
+pub fn auto_despawn_system(mut commands: Commands, query: Query<(Entity, &AutoDespawn)>) {
+    for (entity, auto_despawn) in &query {
+        if auto_despawn.instant.elapsed() > auto_despawn.duration {
+            if auto_despawn.recursive_despawn {
+                commands.entity(entity).despawn_recursive();
+            } else {
+                commands.entity(entity).despawn();
+            }
         }
     }
 }

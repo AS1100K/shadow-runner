@@ -43,6 +43,20 @@ pub struct World {
 pub struct IconsAssets {
     #[asset(path = "icons/icon_reset.png")]
     pub reset_icon: Handle<Image>,
+    #[asset(path = "keyboard/keyboard_W.png")]
+    pub keyboard_w: Handle<Image>,
+    #[asset(path = "keyboard/keyboard_A.png")]
+    pub keyboard_a: Handle<Image>,
+    #[asset(path = "keyboard/keyboard_S.png")]
+    pub keyboard_s: Handle<Image>,
+    #[asset(path = "keyboard/keyboard_D.png")]
+    pub keyboard_d: Handle<Image>,
+    #[asset(path = "keyboard/keyboard_SpaceBar_1.png")]
+    pub keyboard_spacebar_1: Handle<Image>,
+    #[asset(path = "keyboard/keyboard_SpaceBar_2.png")]
+    pub keyboard_spacebar_2: Handle<Image>,
+    #[asset(path = "keyboard/keyboard_SpaceBar_3.png")]
+    pub keyboard_spacebar_3: Handle<Image>,
 }
 
 #[derive(AssetCollection, Resource, Clone)]
