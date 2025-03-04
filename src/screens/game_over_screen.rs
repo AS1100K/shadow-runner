@@ -1,5 +1,9 @@
 use super::despawn_screen;
-use crate::{assets::*, GameState};
+use crate::{
+    assets::*,
+    time::{convert_time_to_text, RestartTimeEvent, TimeTakenRes},
+    GameState,
+};
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
@@ -30,6 +34,7 @@ fn spawn_screen(
     mut commands: Commands,
     font_assets: Res<FontAssets>,
     icon_assets: Res<IconsAssets>,
+    time_taken_res: Res<TimeTakenRes>,
 ) {
     let font = &font_assets.default_font;
     let reset_icon = &icon_assets.reset_icon;
@@ -61,6 +66,21 @@ fn spawn_screen(
                 TextFont {
                     font: font.clone(),
                     font_size: 100.,
+                    ..default()
+                },
+            ));
+
+            // Spawn Time Information
+            parent.spawn((
+                Text::new(format!(
+                    "Time Taken: {}",
+                    convert_time_to_text(&time_taken_res.stopwatch.elapsed())
+                )),
+                // hsl(31, 72%, 46%)
+                TextColor(Color::hsl(31., 0.72, 0.46)),
+                TextFont {
+                    font: font.clone(),
+                    font_size: 28.,
                     ..default()
                 },
             ));
@@ -125,6 +145,7 @@ fn restart_game(
     mut next_game_state: ResMut<NextState<GameState>>,
     mut commands: Commands,
     mut time: ResMut<Time<Virtual>>,
+    mut restart_time_event: EventWriter<RestartTimeEvent>,
 ) {
     for interaction in &query {
         if Interaction::Pressed == *interaction {
@@ -154,6 +175,7 @@ fn restart_game(
 
             for (level_entity, level_iid) in &levels {
                 if level_iid == current_level {
+                    restart_time_event.send(RestartTimeEvent);
                     commands.entity(level_entity).insert(Respawn);
                     next_game_state.set(GameState::PlayingScreen);
                     time.unpause();

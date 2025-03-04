@@ -3,7 +3,8 @@ use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::{
-    assets::AssetsLoadingState, level_manager::CurrentLevelInfo, player::PlayerEntity, GameState,
+    assets::AssetsLoadingState, level_manager::CurrentLevelInfo, player::PlayerEntity,
+    time::RecordTimeEvent, GameState,
 };
 
 pub struct WallPlugin;
@@ -232,7 +233,7 @@ pub fn spawn_wall_collisions(
                             .insert(GlobalTransform::default());
 
                         if wall_rect.origin == 2 || wall_rect.origin == 3 {
-                            info!("Subscribing to collision for {}", wall_rect.origin);
+                            info!("Subscribing to collision for {} Wall", wall_rect.origin);
                             entity.insert(ActiveEvents::COLLISION_EVENTS);
                         }
 
@@ -253,6 +254,7 @@ fn read_collisions(
     mut current_level_info: ResMut<CurrentLevelInfo>,
     mut next_game_state: ResMut<NextState<GameState>>,
     mut time: ResMut<Time<Virtual>>,
+    mut record_time_event: EventWriter<RecordTimeEvent>,
 ) {
     for collision_event in collision_events.read() {
         if let &CollisionEvent::Started(entity_one, entity_two, ..) = collision_event {
@@ -261,6 +263,9 @@ fn read_collisions(
 
             if entity_one == player_entity || entity_two == player_entity {
                 log::info!("Player Collision Detected");
+
+                record_time_event.send(RecordTimeEvent(current_level_info.current_level_id));
+
                 if entity_two == next_level_trigger_entity
                     || entity_one == next_level_trigger_entity
                 {

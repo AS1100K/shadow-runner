@@ -1,9 +1,8 @@
+use crate::{time::RestartTimeEvent, GameState};
 use better_default::Default;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use std::collections::BTreeMap;
-
-use crate::GameState;
 
 pub struct LevelManager;
 
@@ -59,6 +58,7 @@ fn sync_level_changes(
     mut commands: Commands,
     current_level_info: Res<CurrentLevelInfo>,
     all_levels: Res<AllLevels>,
+    mut restart_time_event: EventWriter<RestartTimeEvent>,
 ) {
     if current_level_info.is_changed() {
         log::info!("Inserting level {}", current_level_info.current_level_id);
@@ -67,6 +67,7 @@ fn sync_level_changes(
             .get(&current_level_info.current_level_id)
         {
             commands.insert_resource(LevelSelection::iid(level_iid));
+            restart_time_event.send(RestartTimeEvent);
         } else {
             log::error!("Level didn't found, make sure the ldtk map is syned with the default implementation.");
         }

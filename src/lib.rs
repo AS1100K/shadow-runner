@@ -5,6 +5,7 @@ use bevy_ecs_ldtk::LdtkWorldBundle;
 use level_manager::LevelManager;
 use player::PlayerPlugin;
 use screens::ScreensPlugin;
+use time::TimeTakenPlugin;
 use tutorial::GameTutorialPlugin;
 use walls::WallPlugin;
 
@@ -15,6 +16,7 @@ pub mod level_manager;
 pub mod physics;
 pub mod player;
 pub mod screens;
+pub mod time;
 pub mod tutorial;
 pub mod walls;
 
@@ -49,6 +51,7 @@ impl Plugin for BasePlugin {
             .add_plugins(ScreensPlugin)
             .add_plugins(LevelManager)
             .add_plugins(GameTutorialPlugin)
+            .add_plugins(TimeTakenPlugin)
             .add_plugins(EntitySpawnerPlugin)
             .add_systems(
                 Update,
@@ -74,14 +77,17 @@ fn base_game_system(
     mut time: ResMut<Time<Virtual>>,
     game_state: Res<State<GameState>>,
     mut next_game_state: ResMut<NextState<GameState>>,
+    mut time_taken_res: ResMut<time::TimeTakenRes>,
 ) {
     if keyboard.just_pressed(KeyCode::Escape) {
         match *game_state.get() {
             GameState::PauseScreen => {
+                time_taken_res.stopwatch.unpause();
                 time.unpause();
                 next_game_state.set(GameState::PlayingScreen);
             }
             GameState::PlayingScreen => {
+                time_taken_res.stopwatch.pause();
                 time.pause();
                 next_game_state.set(GameState::PauseScreen);
             }
