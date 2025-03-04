@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{asset::AssetMetaCheck, prelude::*};
 use bevy_ecs_ldtk::LdtkPlugin;
 use shadow_runner::{camera::MainCameraPlugin, physics::PhysicsPlugin, BasePlugin};
 
@@ -6,16 +6,19 @@ fn main() {
     let mut app = App::new();
 
     #[allow(unused_mut)]
-    let mut default_plugins =
-        DefaultPlugins
-            .set(ImagePlugin::default_nearest())
-            .set(WindowPlugin {
-                primary_window: Some(Window {
-                    fit_canvas_to_parent: true,
-                    ..default()
-                }),
+    let mut default_plugins = DefaultPlugins
+        .set(ImagePlugin::default_nearest())
+        .set(WindowPlugin {
+            primary_window: Some(Window {
+                fit_canvas_to_parent: true,
                 ..default()
-            });
+            }),
+            ..default()
+        })
+        .set(AssetPlugin {
+            meta_check: AssetMetaCheck::Never,
+            ..default()
+        });
 
     #[cfg(target_os = "windows")]
     {
