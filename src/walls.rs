@@ -12,7 +12,7 @@ impl Plugin for WallPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (spawn_wall_collisions, read_out_of_world_collisions)
+            (spawn_wall_collisions, read_collisions)
                 .chain()
                 .run_if(in_state(AssetsLoadingState::Loaded)),
         )
@@ -231,7 +231,8 @@ pub fn spawn_wall_collisions(
                             ))
                             .insert(GlobalTransform::default());
 
-                        if wall_rect.origin == 2 | 3 {
+                        if wall_rect.origin == 2 || wall_rect.origin == 3 {
+                            info!("Subscribing to collision for {}", wall_rect.origin);
                             entity.insert(ActiveEvents::COLLISION_EVENTS);
                         }
 
@@ -245,7 +246,7 @@ pub fn spawn_wall_collisions(
     }
 }
 
-fn read_out_of_world_collisions(
+fn read_collisions(
     mut collision_events: EventReader<CollisionEvent>,
     player_query: Query<Entity, With<PlayerEntity>>,
     next_level_trigger_query: Query<Entity, With<NextLevelTrigger>>,
@@ -258,13 +259,16 @@ fn read_out_of_world_collisions(
             let player_entity = player_query.single();
             let next_level_trigger_entity = next_level_trigger_query.single();
 
-            if starting_entity == player_entity && colliding_entity == next_level_trigger_entity {
-                // Next Level
-                current_level_info.current_level_id += 1;
-            } else {
-                // Game Over...
-                next_game_state.set(GameState::GameOverScreen);
-                time.pause();
+            log::info!("Collision Detected");
+            if starting_entity == player_entity {
+                if colliding_entity == next_level_trigger_entity {
+                    // Next Level
+                    current_level_info.current_level_id += 1;
+                } else {
+                    // Game Over...
+                    next_game_state.set(GameState::GameOverScreen);
+                    time.pause();
+                }
             }
         };
     }
