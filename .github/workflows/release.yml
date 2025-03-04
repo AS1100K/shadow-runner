@@ -49,11 +49,11 @@ jobs:
       - name: Get Tag
         id: get_version
         run: |
-          if (${{ startsWith(github.ref, 'refs/tags/') }}) {
+          if [[ "${{ startsWith(github.ref, 'refs/tags/') }}" == "true" ]]; then
             echo "tag=${{ steps.get_version_on_push.outputs.tag }}" >> $GITHUB_OUTPUT
-          } else {
+          else
             echo "tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
-          }
+          fi
       - uses: actions/checkout@v4
         with:
           lfs: ${{ env.use_git_lfs }}
@@ -194,11 +194,11 @@ jobs:
       - name: Get Tag
         id: get_version
         run: |
-          if [[ "${{ startsWith(github.ref, 'refs/tags/') }}" == "true" ]]; then
+          if (${{ startsWith(github.ref, 'refs/tags/') }}) {
             echo "tag=${{ steps.get_version_on_push.outputs.tag }}" >> $GITHUB_OUTPUT
-          else
+          } else {
             echo "tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
-          fi
+          }
       - uses: actions/checkout@v4
         with:
           lfs: ${{ env.use_git_lfs }}
