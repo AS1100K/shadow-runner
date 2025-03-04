@@ -1,0 +1,60 @@
+on:
+    workflow_call:
+        inputs:
+            tag:
+                required: true
+                type: string
+            itch_target:
+                required: true
+                type: string
+        secrets:
+            butler_credentials:
+                required: true
+
+jobs:
+    upload-to-itch:
+        runs-on: ubuntu-latest
+        steps:
+        - name: Download Releases
+          uses: robinraju/release-downloader@v1
+          with:
+            tag: ${{ inputs.tag }}
+            fileName: '*'
+            tarBall: false
+            zipBall: false
+            out-file-path: ./builds
+        - name: Releases Available
+          run: ls builds
+        - name: Organize Release Files
+          run: |
+            mkdir -p organized_builds
+            for file in builds/*; do
+            base_name=$(basename "$file")
+            extension="${base_name##*.}"
+            channel=$(echo "$base_name" | sed -E 's/shadow-runner-(.*)-v[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+\..*/\1/')
+            mkdir -p "organized_builds/$channel"
+            mv "$file" "organized_builds/$channel/shadow-runner.$extension"
+            done
+        - name: Releases Available
+          run: ls organized_builds
+        - name: Install butler
+          run: |
+            curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
+            unzip butler.zip
+            chmod +x butler
+            ./butler -V
+        - name: Upload to itch.io
+          env:
+            BUTLER_API_KEY: ${{ secrets.butler_credentials }}
+          run: |
+            echo "Starting upload to itch.io"
+            for channel in $(ls organized_builds); do
+                echo "Uploading channel: $channel"
+                ./butler push \
+                    --fix-permissions \
+                    --userversion="${{ inputs.tag }}" \
+                    organized_builds/$channel/* \
+                    ${{ inputs.itch_target }}:$channel
+                echo "Finished uploading channel: $channel"
+            done
+            echo "Upload to itch.io completed"

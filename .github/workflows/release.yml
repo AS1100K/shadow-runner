@@ -27,7 +27,11 @@ env:
   # update with the name of the main binary
   binary: shadow-runner
   add_binaries_to_github_release: true
-  itch_target: AS1100K/shadow-runner
+  # Decleared at step
+  # - upload-to-itch-all
+  # - upload-to-itch-only
+  # 
+  # itch_target: AS1100K/shadow-runner
 
   # Before enabling LFS, please take a look at GitHub's documentation for costs and quota limits:
   # https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-storage-and-bandwidth-usage
@@ -39,7 +43,7 @@ jobs:
   # Build for wasm
   release-wasm:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' || github.event.inputs.job == 'all' || github.event.inputs.job == 'release-wasm' }}
+    if: ${{ github.event_name == 'push' || inputs.job == 'all' || inputs.job == 'release-wasm' }}
 
     steps:
       - name: Get Tag (On Push Tags)
@@ -49,11 +53,11 @@ jobs:
       - name: Get Tag
         id: get_version
         run: |
-          if (${{ startsWith(github.ref, 'refs/tags/') }}) {
+          if [[ "${{ startsWith(github.ref, 'refs/tags/') }}" == "true" ]]; then
             echo "tag=${{ steps.get_version_on_push.outputs.tag }}" >> $GITHUB_OUTPUT
-          } else {
+          else
             echo "tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
-          }
+          fi
       - uses: actions/checkout@v4
         with:
           lfs: ${{ env.use_git_lfs }}
@@ -112,7 +116,7 @@ jobs:
   # Build for Linux
   release-linux:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' || github.event.inputs.job == 'all' || github.event.inputs.job == 'release-linux' }}
+    if: ${{ github.event_name == 'push' || inputs.job == 'all' || inputs.job == 'release-linux' }}
 
     steps:
       - name: Get Tag (On Push Tags)
@@ -178,13 +182,13 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ env.binary }}.zip
           asset_name: ${{ env.binary }}-linux-${{ steps.get_version.outputs.tag }}.zip
-          tag: ${{ github.ref }}
+          tag: refs/tags/${{ steps.get_version.outputs.tag }}
           overwrite: true
 
   # Build for Windows
   release-windows:
     runs-on: windows-latest
-    if: ${{ github.event_name == 'push' || github.event.inputs.job == 'all' || github.event.inputs.job == 'release-windows' }}
+    if: ${{ github.event_name == 'push' || inputs.job == 'all' || inputs.job == 'release-windows' }}
 
     steps:
       - name: Get Tag (On Push Tags)
@@ -199,6 +203,7 @@ jobs:
           else
             echo "tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
           fi
+        shell: bash
       - uses: actions/checkout@v4
         with:
           lfs: ${{ env.use_git_lfs }}
@@ -234,13 +239,13 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ env.binary }}.zip
           asset_name: ${{ env.binary }}-windows-${{ steps.get_version.outputs.tag }}.zip
-          tag: ${{ github.ref }}
+          tag: refs/tags/${{ steps.get_version.outputs.tag }}
           overwrite: true
 
   # Build for MacOS x86_64
   release-macOS-intel:
     runs-on: macOS-latest
-    if: ${{ github.event_name == 'push' || github.event.inputs.job == 'all' || github.event.inputs.job == 'release-macOS-intel' }}
+    if: ${{ github.event_name == 'push' || inputs.job == 'all' || inputs.job == 'release-macOS-intel' }}
 
     steps:
       - name: Get Tag (On Push Tags)
@@ -292,13 +297,13 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file:  ${{ env.binary }}-macOS-intel.dmg
           asset_name: ${{ env.binary }}-macOS-intel-${{ steps.get_version.outputs.tag }}.dmg
-          tag: ${{ github.ref }}
+          tag: refs/tags/${{ steps.get_version.outputs.tag }}
           overwrite: true
 
   # Build for MacOS Apple Silicon
   release-macOS-apple-silicon:
     runs-on: macOS-latest
-    if: ${{ github.event_name == 'push' || github.event.inputs.job == 'all' || github.event.inputs.job == 'release-macOS-apple-silicon' }}
+    if: ${{ github.event_name == 'push' || inputs.job == 'all' || inputs.job == 'release-macOS-apple-silicon' }}
 
     steps:
       - name: Get Tag (On Push Tags)
@@ -348,55 +353,55 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ env.binary }}-macOS-apple-silicon.dmg
           asset_name: ${{ env.binary }}-macOS-apple-silicon-${{ steps.get_version.outputs.tag }}.dmg
-          tag: ${{ github.ref }}
+          tag: refs/tags/${{ steps.get_version.outputs.tag }}
           overwrite: true
 
-  check-if-upload-to-itch-is-configured:
+  upload-to-itch-configuration:
     runs-on: ubuntu-latest
     outputs:
-      should-upload: ${{ steps.check-env.outputs.has-itch-target }}
+      tag: ${{ steps.get_version.outputs.tag }}
     steps:
-      - id: check-env
+      - name: Debug Info
         run: |
-          if [[ -z "$itch_target" ]]; then
-            echo "has-itch-target=no" >> $GITHUB_OUTPUT
+          echo "inputs.job: ${{ inputs.job }} || github.event.inputs.job: ${{ github.event.inputs.job }}"
+          echo "inputs.tag: ${{ inputs.tag }} || github.event.inputs.tag: ${{ github.event.inputs.tag }}"
+      - name: Get Tag (On Push Tags)
+        if: startsWith(github.ref, 'refs/tags/')
+        id: get_version_on_push
+        uses: olegtarasov/get-tag@v2.1.2
+      - name: Get Tag
+        id: get_version
+        run: |
+          if [[ "${{ startsWith(github.ref, 'refs/tags/') }}" == "true" ]]; then
+            echo "tag=${{ steps.get_version_on_push.outputs.tag }}" >> $GITHUB_OUTPUT
           else
-            echo "has-itch-target=yes" >> $GITHUB_OUTPUT
+            echo "tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
           fi
 
-  upload-to-itch:
-    runs-on: ubuntu-latest
-    if: ${{ needs.check-if-upload-to-itch-is-configured.outputs.should-upload == 'yes' && ( github.event_name == 'push' || github.event.inputs.job == 'all' || github.event.inputs.job == 'upload-to-itch' ) }}
-    needs:
-      - check-if-upload-to-itch-is-configured
+  upload-to-itch-all:
+    if: ${{ github.event_name == 'push' || inputs.job == 'all' }}
+    needs: 
+      - upload-to-itch-configuration
       - release-wasm
       - release-linux
       - release-windows
       - release-macOS-intel
       - release-macOS-apple-silicon
+      
+    uses: AS1100K/shadow-runner/.github/workflows/upload-to-itch.yml@master
+    with: 
+      tag: ${{ needs.upload-to-itch-configuration.outputs.tag }}
+      itch_target: "AS1100K/shadow-runner"
+    secrets:
+      butler_credentials: ${{ secrets.BUTLER_CREDENTIALS  }}
 
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: ./builds
-
-      - name: Install butler
-        run: |
-          curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
-          unzip butler.zip
-          chmod +x butler
-          ./butler -V
-      - uses: olegtarasov/get-tag@v2.1.2
-        id: get_version
-      - name: Upload to itch.io
-        env:
-          BUTLER_API_KEY: ${{ secrets.BUTLER_CREDENTIALS }}
-        run: |
-          for channel in $(ls builds); do
-            ./butler push \
-                --fix-permissions \
-                --userversion="${{ steps.get_version.outputs.tag }}" \
-                builds/$channel/* \
-                ${{ env.itch_target }}:$channel
-          done
+  upload-to-itch-only:
+    if: ${{ inputs.job == 'upload-to-itch' }}
+    needs: 
+      upload-to-itch-configuration
+    uses: AS1100K/shadow-runner/.github/workflows/upload-to-itch.yml@master
+    with: 
+      tag: ${{ needs.upload-to-itch-configuration.outputs.tag }}
+      itch_target: "AS1100K/shadow-runner"
+    secrets:
+      butler_credentials: ${{ secrets.BUTLER_CREDENTIALS  }}
