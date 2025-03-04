@@ -1,7 +1,6 @@
-use std::time::{Duration, Instant};
-
 use assets::AssetsManagerPlugin;
 use bevy::prelude::*;
+use bevy::utils::{Duration, Instant};
 use bevy_ecs_ldtk::LdtkWorldBundle;
 use level_manager::LevelManager;
 use player::PlayerPlugin;
@@ -92,7 +91,7 @@ fn base_game_system(
 }
 
 #[derive(Component, better_default::Default)]
-#[default(instant: Instant::now(), duration: Duration::from_secs(2), recursive_despawn: true)]
+#[default(instant: Instant::now(), duration: Duration::from_secs(5), recursive_despawn: true)]
 pub struct AutoDespawn {
     instant: Instant,
     duration: Duration,
