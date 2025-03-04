@@ -3932,7 +3932,7 @@ dependencies = [
 
 [[package]]
 name = "shadow-runner"
-version = "0.1.0"
+version = "0.1.0-alpha.2"
 dependencies = [
  "better_default",
  "bevy",
