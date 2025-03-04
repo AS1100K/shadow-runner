@@ -255,13 +255,15 @@ fn read_collisions(
     mut time: ResMut<Time<Virtual>>,
 ) {
     for collision_event in collision_events.read() {
-        if let &CollisionEvent::Started(starting_entity, colliding_entity, ..) = collision_event {
+        if let &CollisionEvent::Started(entity_one, entity_two, ..) = collision_event {
             let player_entity = player_query.single();
             let next_level_trigger_entity = next_level_trigger_query.single();
 
-            log::info!("Collision Detected");
-            if starting_entity == player_entity {
-                if colliding_entity == next_level_trigger_entity {
+            if entity_one == player_entity || entity_two == player_entity {
+                log::info!("Player Collision Detected");
+                if entity_two == next_level_trigger_entity
+                    || entity_one == next_level_trigger_entity
+                {
                     // Next Level
                     current_level_info.current_level_id += 1;
                 } else {
