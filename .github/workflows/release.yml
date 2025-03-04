@@ -4,6 +4,24 @@ on:
   push:
     tags:
       - '*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release'
+        required: true
+        type: string
+      job:
+        description: 'Job to run (release-wasm, release-linux, release-windows, release-macOS-intel, release-macOS-apple-silicon, upload-to-itch)'
+        required: false
+        type: choice
+        options:
+          - all
+          - release-wasm
+          - release-linux
+          - release-windows
+          - release-macOS-intel
+          - release-macOS-apple-silicon
+          - upload-to-itch
 
 env:
   # update with the name of the main binary
@@ -21,13 +39,25 @@ jobs:
   # Build for wasm
   release-wasm:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' || github.event.inputs.job == 'all' || github.event.inputs.job == 'release-wasm' }}
 
     steps:
-      - uses: olegtarasov/get-tag@v2.1.2
+      - name: Get Tag (On Push Tags)
+        if: startsWith(github.ref, 'refs/tags/')
+        id: get_version_on_push
+        uses: olegtarasov/get-tag@v2.1.2
+      - name: Get Tag
         id: get_version
+        run: |
+          if (${{ startsWith(github.ref, 'refs/tags/') }}) {
+            echo "tag=${{ steps.get_version_on_push.outputs.tag }}" >> $GITHUB_OUTPUT
+          } else {
+            echo "tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+          }
       - uses: actions/checkout@v4
         with:
           lfs: ${{ env.use_git_lfs }}
+          ref: ${{ steps.get_version.outputs.tag }}
       - name: Free Disk Space
         uses: jlumbroso/free-disk-space@main
         with:
@@ -50,11 +80,11 @@ jobs:
 
       - name: Build
         run: |
-          cargo build --release --target wasm32-unknown-unknown
+          cargo build --profile "release-wasm" --target wasm32-unknown-unknown
 
       - name: Prepare package
         run: |
-          wasm-bindgen --no-typescript --out-name bevy_game --out-dir wasm --target web target/wasm32-unknown-unknown/release/${{ env.binary }}.wasm
+          wasm-bindgen --no-typescript --out-name bevy_game --out-dir wasm --target web target/wasm32-unknown-unknown/release-wasm/${{ env.binary }}.wasm
           cp -r assets wasm/ || true # Try to copy, but ignore if it can't copy if source directory does not exist 
 
       - name: Package as a zip
@@ -76,19 +106,31 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ env.binary }}.zip
           asset_name: ${{ env.binary }}-wasm-${{ steps.get_version.outputs.tag }}.zip
-          tag: ${{ github.ref }}
+          tag: refs/tags/${{ steps.get_version.outputs.tag }}
           overwrite: true
 
   # Build for Linux
   release-linux:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' || github.event.inputs.job == 'all' || github.event.inputs.job == 'release-linux' }}
 
     steps:
-      - uses: olegtarasov/get-tag@v2.1.2
+      - name: Get Tag (On Push Tags)
+        if: startsWith(github.ref, 'refs/tags/')
+        id: get_version_on_push
+        uses: olegtarasov/get-tag@v2.1.2
+      - name: Get Tag
         id: get_version
+        run: |
+          if [[ "${{ startsWith(github.ref, 'refs/tags/') }}" == "true" ]]; then
+            echo "tag=${{ steps.get_version_on_push.outputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+          fi
       - uses: actions/checkout@v4
         with:
           lfs: ${{ env.use_git_lfs }}
+          ref: ${{ steps.get_version.outputs.tag }}
       - name: Free Disk Space
         uses: jlumbroso/free-disk-space@main
         with:
@@ -142,13 +184,25 @@ jobs:
   # Build for Windows
   release-windows:
     runs-on: windows-latest
+    if: ${{ github.event_name == 'push' || github.event.inputs.job == 'all' || github.event.inputs.job == 'release-windows' }}
 
     steps:
-      - uses: olegtarasov/get-tag@v2.1.2
+      - name: Get Tag (On Push Tags)
+        if: startsWith(github.ref, 'refs/tags/')
+        id: get_version_on_push
+        uses: olegtarasov/get-tag@v2.1.2
+      - name: Get Tag
         id: get_version
+        run: |
+          if [[ "${{ startsWith(github.ref, 'refs/tags/') }}" == "true" ]]; then
+            echo "tag=${{ steps.get_version_on_push.outputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+          fi
       - uses: actions/checkout@v4
         with:
           lfs: ${{ env.use_git_lfs }}
+          ref: ${{ steps.get_version.outputs.tag }}
       - uses: rs-workspace/rust-toolchain@v0.2.0
 
       - name: Build
@@ -186,13 +240,25 @@ jobs:
   # Build for MacOS x86_64
   release-macOS-intel:
     runs-on: macOS-latest
+    if: ${{ github.event_name == 'push' || github.event.inputs.job == 'all' || github.event.inputs.job == 'release-macOS-intel' }}
 
     steps:
-      - uses: olegtarasov/get-tag@v2.1.2
+      - name: Get Tag (On Push Tags)
+        if: startsWith(github.ref, 'refs/tags/')
+        id: get_version_on_push
+        uses: olegtarasov/get-tag@v2.1.2
+      - name: Get Tag
         id: get_version
+        run: |
+          if [[ "${{ startsWith(github.ref, 'refs/tags/') }}" == "true" ]]; then
+            echo "tag=${{ steps.get_version_on_push.outputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+          fi
       - uses: actions/checkout@v4
         with:
           lfs: ${{ env.use_git_lfs }}
+          ref: ${{ steps.get_version.outputs.tag }}
       - uses: rs-workspace/rust-toolchain@v0.2.0
       - name: Install Rust Toolchain
         run: rustup target add x86_64-apple-darwin
@@ -232,13 +298,25 @@ jobs:
   # Build for MacOS Apple Silicon
   release-macOS-apple-silicon:
     runs-on: macOS-latest
+    if: ${{ github.event_name == 'push' || github.event.inputs.job == 'all' || github.event.inputs.job == 'release-macOS-apple-silicon' }}
 
     steps:
-      - uses: olegtarasov/get-tag@v2.1.2
+      - name: Get Tag (On Push Tags)
+        if: startsWith(github.ref, 'refs/tags/')
+        id: get_version_on_push
+        uses: olegtarasov/get-tag@v2.1.2
+      - name: Get Tag
         id: get_version
+        run: |
+          if [[ "${{ startsWith(github.ref, 'refs/tags/') }}" == "true" ]]; then
+            echo "tag=${{ steps.get_version_on_push.outputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+          fi
       - uses: actions/checkout@v4
         with:
           lfs: ${{ env.use_git_lfs }}
+          ref: ${{ steps.get_version.outputs.tag }}
       - uses: rs-workspace/rust-toolchain@v0.2.0
       - name: Environment 
         # macOS 11 was the first version to support ARM
@@ -288,6 +366,7 @@ jobs:
 
   upload-to-itch:
     runs-on: ubuntu-latest
+    if: ${{ needs.check-if-upload-to-itch-is-configured.outputs.should-upload == 'yes' && ( github.event_name == 'push' || github.event.inputs.job == 'all' || github.event.inputs.job == 'upload-to-itch' ) }}
     needs:
       - check-if-upload-to-itch-is-configured
       - release-wasm
@@ -295,7 +374,6 @@ jobs:
       - release-windows
       - release-macOS-intel
       - release-macOS-apple-silicon
-    if: ${{ needs.check-if-upload-to-itch-is-configured.outputs.should-upload == 'yes' }}
 
     steps:
       - name: Download artifacts

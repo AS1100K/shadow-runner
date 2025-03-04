@@ -19,4 +19,10 @@ lto = true
 opt-level = 3
 codegen-units = 1
 incremental = false
-debug = false
+panic = "abort"
+
+[profile.release-wasm]
+inherits = "release"
+codegen-units = 16
+incremental = true
+opt-level = "z"
