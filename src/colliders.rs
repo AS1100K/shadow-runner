@@ -2,7 +2,10 @@ use bevy::prelude::*;
 use bevy_ecs_ldtk::{EntityInstance, LdtkIntCell};
 use bevy_rapier2d::prelude::*;
 
-use crate::player::{PLAYER_HEIGHT, PLAYER_WIDTH};
+use crate::{
+    player::{PLAYER_HEIGHT, PLAYER_WIDTH},
+    GRID_SIZE,
+};
 
 #[derive(Default, Bundle, LdtkIntCell)]
 pub struct ColliderBundle {
@@ -27,6 +30,12 @@ impl From<&EntityInstance> for ColliderBundle {
                     coefficient: 0.,
                     combine_rule: CoefficientCombineRule::Min,
                 },
+                rotation_constraints,
+                ..default()
+            },
+            "Sand_Ghoul" => ColliderBundle {
+                rigid_body: RigidBody::KinematicVelocityBased,
+                collider: Collider::cuboid(GRID_SIZE as f32 / 2., GRID_SIZE as f32 / 2.),
                 rotation_constraints,
                 ..default()
             },

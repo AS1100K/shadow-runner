@@ -23,6 +23,9 @@ impl Plugin for WallPlugin {
     }
 }
 
+// TODO: Directly implement LdtkIntCell Trait instead of macro
+// as it will simplify spawn_wall_collisions and also
+// introduce ability to remove sprite for some walls
 #[derive(Default, Bundle, LdtkIntCell)]
 pub struct Wall<C: Component + Default> {
     wall_entity: C,
@@ -43,6 +46,9 @@ pub struct GlobalWallEntity;
 
 #[derive(Default, Component)]
 pub struct NextLevelTrigger;
+
+#[derive(Default, Component)]
+pub struct OutOfWorldTrigger;
 
 // This system is inspired from platformer example in `bevy_ecs_ldtk` and is modified
 // to add specific components based on which IntCell was that wall of.
@@ -237,6 +243,10 @@ pub fn spawn_wall_collisions(
                             entity.insert(ActiveEvents::COLLISION_EVENTS);
                         }
 
+                        if wall_rect.origin == 2 {
+                            entity.insert(OutOfWorldTrigger);
+                        }
+
                         if wall_rect.origin == 3 {
                             entity.insert(NextLevelTrigger);
                         }
@@ -251,6 +261,7 @@ fn read_collisions(
     mut collision_events: EventReader<CollisionEvent>,
     player_query: Query<Entity, With<PlayerEntity>>,
     next_level_trigger_query: Query<Entity, With<NextLevelTrigger>>,
+    out_of_world_trigger_query: Query<Entity, With<OutOfWorldTrigger>>,
     mut current_level_info: ResMut<CurrentLevelInfo>,
     mut next_game_state: ResMut<NextState<GameState>>,
     mut time: ResMut<Time<Virtual>>,
@@ -264,17 +275,23 @@ fn read_collisions(
             if entity_one == player_entity || entity_two == player_entity {
                 log::info!("Player Collision Detected");
 
-                record_time_event.send(RecordTimeEvent(current_level_info.current_level_id));
-
                 if entity_two == next_level_trigger_entity
                     || entity_one == next_level_trigger_entity
                 {
                     // Next Level
                     current_level_info.current_level_id += 1;
+                    record_time_event.send(RecordTimeEvent(current_level_info.current_level_id));
                 } else {
-                    // Game Over...
-                    next_game_state.set(GameState::GameOverScreen);
-                    time.pause();
+                    for out_of_world_entity in &out_of_world_trigger_query {
+                        if entity_two == out_of_world_entity || entity_one == out_of_world_entity {
+                            // Game Over...
+                            record_time_event
+                                .send(RecordTimeEvent(current_level_info.current_level_id));
+                            next_game_state.set(GameState::GameOverScreen);
+                            time.pause();
+                            return;
+                        }
+                    }
                 }
             }
         };

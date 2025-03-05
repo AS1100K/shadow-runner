@@ -2,6 +2,7 @@ use assets::AssetsManagerPlugin;
 use bevy::prelude::*;
 use bevy::utils::{Duration, Instant};
 use bevy_ecs_ldtk::LdtkWorldBundle;
+use hostile_entity::HostilePlugin;
 use level_manager::LevelManager;
 use player::PlayerPlugin;
 use screens::ScreensPlugin;
@@ -13,6 +14,7 @@ pub mod assets;
 pub mod camera;
 pub mod colliders;
 pub mod ground_detection;
+pub mod hostile_entity;
 pub mod level_manager;
 pub mod physics;
 pub mod player;
@@ -30,7 +32,8 @@ impl Plugin for EntitySpawnerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(assets::AssetsLoadingState::Loaded), spawn_basic)
             .add_plugins(WallPlugin)
-            .add_plugins(PlayerPlugin);
+            .add_plugins(PlayerPlugin)
+            .add_plugins(HostilePlugin);
     }
 }
 
@@ -48,6 +51,7 @@ pub struct BasePlugin;
 impl Plugin for BasePlugin {
     fn build(&self, app: &mut App) {
         app.insert_state(GameState::default())
+            .insert_resource(Time::<Fixed>::from_seconds(1.))
             .add_plugins(AssetsManagerPlugin)
             .add_plugins(ScreensPlugin)
             .add_plugins(LevelManager)

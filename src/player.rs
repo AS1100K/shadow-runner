@@ -2,7 +2,9 @@ use crate::{
     assets::{AssetsLoadingState, IconsAssets},
     colliders::ColliderBundle,
     ground_detection::{GroundDetection, GroundDetectionPlugin},
+    level_manager::CurrentLevelInfo,
     screens::despawn_screen,
+    time::RecordTimeEvent,
     GameState,
 };
 use bevy::prelude::*;
@@ -52,6 +54,10 @@ impl Plugin for PlayerPlugin {
             .add_systems(
                 Update,
                 sync_healthbar.run_if(in_state(GameState::PlayingScreen)),
+            )
+            .add_systems(
+                FixedUpdate,
+                continue_taking_damage.run_if(in_state(GameState::PlayingScreen)),
             );
     }
 }
@@ -76,6 +82,10 @@ fn player_movement(
 #[derive(Component)]
 pub struct HealthBarContext;
 
+#[derive(Component)]
+#[require(HealthBar)]
+pub struct ContinueTakingDamage;
+
 fn spawn_healthbar(mut commands: Commands) {
     commands.spawn((
         Node {
@@ -97,8 +107,20 @@ fn sync_healthbar(
     health_bar_context_query: Query<Entity, With<HealthBarContext>>,
     icons_assets: Res<IconsAssets>,
     mut commands: Commands,
+    current_level_info: Res<CurrentLevelInfo>,
+    mut record_time_event: EventWriter<RecordTimeEvent>,
+    mut next_game_state: ResMut<NextState<GameState>>,
+    mut time: ResMut<Time<Virtual>>,
 ) {
     for health_bar in &health_bar_query {
+        if health_bar.health == 0 {
+            // Game Over
+            record_time_event.send(RecordTimeEvent(current_level_info.current_level_id));
+            next_game_state.set(GameState::GameOverScreen);
+            time.pause();
+            return;
+        }
+
         for health_bar_context in &health_bar_context_query {
             let mut health_bar_context_commands = commands.entity(health_bar_context);
 
@@ -122,5 +144,11 @@ fn sync_healthbar(
                 }
             });
         }
+    }
+}
+
+fn continue_taking_damage(mut query: Query<&mut HealthBar, With<ContinueTakingDamage>>) {
+    for mut health_bar in &mut query {
+        health_bar.health -= 1;
     }
 }
