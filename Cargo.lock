@@ -3938,6 +3938,7 @@ dependencies = [
  "bevy",
  "bevy_asset_loader",
  "bevy_ecs_ldtk",
+ "bevy_ecs_tilemap",
  "bevy_rapier2d",
  "log",
 ]

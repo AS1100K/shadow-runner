@@ -1,5 +1,6 @@
 use bevy::{prelude::*, utils::HashMap};
 use bevy_ecs_ldtk::prelude::*;
+use bevy_ecs_tilemap::{map::TilemapId, tiles::TileBundle};
 use bevy_rapier2d::prelude::*;
 
 use crate::{
@@ -13,7 +14,7 @@ impl Plugin for WallPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (spawn_wall_collisions, read_collisions)
+            (spawn_wall_collisions, despawn_tile_bundle, read_collisions)
                 .chain()
                 .run_if(in_state(AssetsLoadingState::Loaded)),
         )
@@ -254,6 +255,20 @@ pub fn spawn_wall_collisions(
                 });
             }
         });
+    }
+}
+
+// This component is essential as these tiles are just used for reference
+// and should not be rendered in the game
+fn despawn_tile_bundle(
+    query: Query<Entity, (Added<GlobalWallEntity>, With<TilemapId>)>,
+    mut commands: Commands,
+) {
+    for entity in &query {
+        commands
+            .entity(entity)
+            .remove::<TileBundle>()
+            .remove::<Sprite>();
     }
 }
 
