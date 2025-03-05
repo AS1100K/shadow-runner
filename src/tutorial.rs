@@ -14,8 +14,8 @@ impl Plugin for GameTutorialPlugin {
             .insert_resource(TutorialInfo::default())
             .add_systems(
                 OnTransition {
-                    entered: GameState::PlayingScreen,
                     exited: GameState::LevelsMenuScreen,
+                    entered: GameState::PlayingScreen,
                 },
                 set_tutorial_state,
             )
@@ -32,6 +32,10 @@ impl Plugin for GameTutorialPlugin {
                 (tutorial_progress, update_tutorial_context)
                     .chain()
                     .run_if(in_state(TutorialState::OnGoing)),
+            )
+            .add_systems(
+                Update,
+                update_healthbar_context.run_if(in_state(GameState::PlayingScreen)),
             );
     }
 }
@@ -296,5 +300,33 @@ fn update_tutorial_context(
                     ));
             }
         }
+    }
+}
+
+fn update_healthbar_context(
+    current_level_info: Res<CurrentLevelInfo>,
+    font_assets: Res<FontAssets>,
+    mut commands: Commands,
+) {
+    if current_level_info.is_changed() && current_level_info.current_level_id == 1 {
+        commands
+            .spawn((
+                AutoDespawn::default(),
+                Node {
+                    left: Val::Px(10.),
+                    bottom: Val::Px(10.),
+                    position_type: PositionType::Absolute,
+                    ..default()
+                },
+            ))
+            .with_child((
+                Text::new("Let's Introduce Some Hostile Entities, It will be fun..."),
+                TextFont {
+                    font: font_assets.default_font.clone(),
+                    font_size: 28.,
+                    ..default()
+                },
+                TextColor(Color::WHITE),
+            ));
     }
 }

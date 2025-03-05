@@ -43,6 +43,8 @@ pub struct World {
 pub struct IconsAssets {
     #[asset(path = "icons/icon_reset.png")]
     pub reset_icon: Handle<Image>,
+    #[asset(path = "icons/icon_heart.png")]
+    pub heart_icon: Handle<Image>,
     #[asset(path = "keyboard/keyboard_W.png")]
     pub keyboard_w: Handle<Image>,
     #[asset(path = "keyboard/keyboard_A.png")]
