@@ -108,7 +108,7 @@ pub struct HealthBarContext;
 
 #[derive(Component)]
 #[require(HealthBar)]
-pub struct ContinueTakingDamage;
+pub struct ContinueTakingDamage(pub u8);
 
 fn spawn_healthbar(mut commands: Commands) {
     commands.spawn((
@@ -172,8 +172,12 @@ fn sync_healthbar(
     }
 }
 
-fn continue_taking_damage(mut query: Query<&mut HealthBar, With<ContinueTakingDamage>>) {
-    for mut health_bar in &mut query {
-        health_bar.health -= 1;
+fn continue_taking_damage(mut query: Query<(&mut HealthBar, &ContinueTakingDamage)>) {
+    for (mut health_bar, damage_count) in &mut query {
+        if health_bar.health > damage_count.0 {
+            health_bar.health -= 1;
+        } else {
+            health_bar.health = 0;
+        }
     }
 }

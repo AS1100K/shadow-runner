@@ -33,7 +33,7 @@ impl From<&EntityInstance> for ColliderBundle {
                 rotation_constraints,
                 ..default()
             },
-            "Sand_Ghoul" => ColliderBundle {
+            "Sand_Ghoul" | "Grave_Revenant" | "Mutilated_Stumbler" => ColliderBundle {
                 rigid_body: RigidBody::KinematicVelocityBased,
                 collider: Collider::cuboid(GRID_SIZE as f32 / 2., GRID_SIZE as f32 / 2.),
                 rotation_constraints,
