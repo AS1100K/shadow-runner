@@ -12,6 +12,7 @@ use walls::WallPlugin;
 pub mod assets;
 pub mod camera;
 pub mod colliders;
+pub mod ground_detection;
 pub mod level_manager;
 pub mod physics;
 pub mod player;
