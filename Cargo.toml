@@ -11,7 +11,7 @@ bevy = "0.15"
 bevy_rapier2d = "0.29"
 bevy_ecs_ldtk = "0.11"
 bevy_ecs_tilemap = "0.15"
-bevy_asset_loader = "0.22"
+bevy_asset_loader = { version = "0.22", features = ["2d"] }
 better_default = "1"
 log = { version = "*", features = ["max_level_debug", "release_max_level_warn"] }
 

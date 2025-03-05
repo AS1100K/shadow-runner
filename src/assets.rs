@@ -13,7 +13,8 @@ impl Plugin for AssetsManagerPlugin {
                     .continue_to_state(AssetsLoadingState::Loaded)
                     .load_collection::<World>()
                     .load_collection::<IconsAssets>()
-                    .load_collection::<FontAssets>(),
+                    .load_collection::<FontAssets>()
+                    .load_collection::<HostileEntityAssets>(),
             )
             .add_systems(
                 OnTransition {
@@ -37,6 +38,27 @@ pub enum AssetsLoadingState {
 pub struct World {
     #[asset(path = "shadow_runner.ldtk")]
     pub ldtk: Handle<LdtkProject>,
+}
+
+#[derive(AssetCollection, Resource, Clone)]
+pub struct HostileEntityAssets {
+    #[asset(texture_atlas_layout(
+        tile_size_x = 16,
+        tile_size_y = 16,
+        columns = 4,
+        rows = 1,
+        padding_x = 0,
+        padding_y = 0,
+        offset_x = 0,
+        offset_y = 0
+    ))]
+    pub layout: Handle<TextureAtlasLayout>,
+    #[asset(path = "hostile/Sand Ghoul/SandGhoul.png")]
+    pub sand_ghoul: Handle<Image>,
+    #[asset(path = "hostile/Grave Revenant/GraveRevenant.png")]
+    pub grave_revenant: Handle<Image>,
+    #[asset(path = "hostile/Mutilated Stumbler/MutilatedStumbler.png")]
+    pub mutilated_stumbler: Handle<Image>,
 }
 
 #[derive(AssetCollection, Resource, Clone)]

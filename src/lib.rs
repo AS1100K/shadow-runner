@@ -23,6 +23,7 @@ pub mod screens;
 pub mod sprite_animation;
 pub mod time;
 pub mod tutorial;
+pub mod utils;
 pub mod walls;
 
 pub const GRID_SIZE: i32 = 16;

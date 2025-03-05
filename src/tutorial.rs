@@ -1,7 +1,10 @@
+use std::time::Duration;
+
 use crate::{
-    assets::{FontAssets, IconsAssets},
+    assets::{FontAssets, HostileEntityAssets, IconsAssets},
     level_manager::CurrentLevelInfo,
     screens::despawn_screen,
+    sprite_animation::Animation,
     AutoDespawn, GameState,
 };
 use bevy::prelude::*;
@@ -35,7 +38,7 @@ impl Plugin for GameTutorialPlugin {
             )
             .add_systems(
                 Update,
-                update_healthbar_context.run_if(in_state(GameState::PlayingScreen)),
+                update_level_specific_context.run_if(in_state(GameState::PlayingScreen)),
             );
     }
 }
@@ -303,30 +306,205 @@ fn update_tutorial_context(
     }
 }
 
-fn update_healthbar_context(
+fn update_level_specific_context(
     current_level_info: Res<CurrentLevelInfo>,
     font_assets: Res<FontAssets>,
+    hostile_assets: Res<HostileEntityAssets>,
     mut commands: Commands,
 ) {
-    if current_level_info.is_changed() && current_level_info.current_level_id == 1 {
-        commands
-            .spawn((
-                AutoDespawn::default(),
-                Node {
-                    left: Val::Px(10.),
-                    bottom: Val::Px(10.),
-                    position_type: PositionType::Absolute,
-                    ..default()
-                },
-            ))
-            .with_child((
-                Text::new("Let's Introduce Some Hostile Entities, It will be fun..."),
-                TextFont {
-                    font: font_assets.default_font.clone(),
-                    font_size: 28.,
-                    ..default()
-                },
-                TextColor(Color::WHITE),
-            ));
+    if current_level_info.is_changed() {
+        match current_level_info.current_level_id {
+            1 => {
+                commands
+                    .spawn((
+                        AutoDespawn::default(),
+                        Node {
+                            left: Val::Px(10.),
+                            bottom: Val::Px(10.),
+                            position_type: PositionType::Absolute,
+                            ..default()
+                        },
+                    ))
+                    .with_child((
+                        Text::new(
+                            "Let's Introduce Some Hostile Entities, It will be fun...\nDodge Them",
+                        ),
+                        TextFont {
+                            font: font_assets.default_font.clone(),
+                            font_size: 33.,
+                            ..default()
+                        },
+                        TextColor(Color::WHITE),
+                    ));
+            }
+            2 => {
+                commands
+                    .spawn((
+                        AutoDespawn::new_recursive_despawn(Duration::from_secs(30)),
+                        Node {
+                            right: Val::Px(10.),
+                            bottom: Val::Px(10.),
+                            position_type: PositionType::Absolute,
+                            display: Display::Flex,
+                            flex_direction: FlexDirection::Column,
+                            justify_content: JustifyContent::FlexEnd,
+                            row_gap: Val::Px(20.),
+                            ..default()
+                        },
+                    ))
+                    .with_children(|parent| {
+                        // Sand Ghoul
+                        parent
+                            .spawn(Node {
+                                display: Display::Flex,
+                                justify_content: JustifyContent::Center,
+                                align_content: AlignContent::Center,
+                                column_gap: Val::Px(20.),
+                                ..default()
+                            })
+                            .with_children(|parent| {
+                                parent
+                                    .spawn(Node {
+                                        width: Val::Px(75.),
+                                        height: Val::Px(75.),
+                                        ..default()
+                                    })
+                                    .with_child((
+                                        ImageNode {
+                                            image: hostile_assets.sand_ghoul.clone(),
+                                            texture_atlas: Some(
+                                                hostile_assets.layout.clone().into(),
+                                            ),
+                                            ..default()
+                                        },
+                                        Animation::new_image_node(
+                                            0,
+                                            3,
+                                            Timer::from_seconds(0.25, TimerMode::Repeating),
+                                        ),
+                                    ));
+
+                                parent
+                                    .spawn(Node {
+                                        height: Val::Px(75.),
+                                        display: Display::Flex,
+                                        justify_content: JustifyContent::FlexEnd,
+                                        align_items: AlignItems::Center,
+                                        ..default()
+                                    })
+                                    .with_child((
+                                        Text::new("1 Heart Damage"),
+                                        TextColor(Color::WHITE),
+                                        TextFont {
+                                            font: font_assets.default_font.clone(),
+                                            font_size: 28.,
+                                            ..default()
+                                        },
+                                    ));
+                            });
+
+                        // Grave Revenant
+                        parent
+                            .spawn(Node {
+                                display: Display::Flex,
+                                justify_content: JustifyContent::Center,
+                                align_content: AlignContent::Center,
+                                column_gap: Val::Px(20.),
+                                ..default()
+                            })
+                            .with_children(|parent| {
+                                parent
+                                    .spawn(Node {
+                                        width: Val::Px(75.),
+                                        height: Val::Px(75.),
+                                        ..default()
+                                    })
+                                    .with_child((
+                                        ImageNode {
+                                            image: hostile_assets.grave_revenant.clone(),
+                                            texture_atlas: Some(
+                                                hostile_assets.layout.clone().into(),
+                                            ),
+                                            ..default()
+                                        },
+                                        Animation::new_image_node(
+                                            0,
+                                            3,
+                                            Timer::from_seconds(0.25, TimerMode::Repeating),
+                                        ),
+                                    ));
+
+                                parent
+                                    .spawn(Node {
+                                        height: Val::Px(75.),
+                                        display: Display::Flex,
+                                        justify_content: JustifyContent::FlexEnd,
+                                        align_items: AlignItems::Center,
+                                        ..default()
+                                    })
+                                    .with_child((
+                                        Text::new("2 Heart Damage"),
+                                        TextColor(Color::WHITE),
+                                        TextFont {
+                                            font: font_assets.default_font.clone(),
+                                            font_size: 28.,
+                                            ..default()
+                                        },
+                                    ));
+                            });
+
+                        // Mutilated Stumbler
+                        parent
+                            .spawn(Node {
+                                display: Display::Flex,
+                                justify_content: JustifyContent::Center,
+                                align_content: AlignContent::Center,
+                                column_gap: Val::Px(20.),
+                                ..default()
+                            })
+                            .with_children(|parent| {
+                                parent
+                                    .spawn(Node {
+                                        width: Val::Px(75.),
+                                        height: Val::Px(75.),
+                                        ..default()
+                                    })
+                                    .with_child((
+                                        ImageNode {
+                                            image: hostile_assets.mutilated_stumbler.clone(),
+                                            texture_atlas: Some(
+                                                hostile_assets.layout.clone().into(),
+                                            ),
+                                            ..default()
+                                        },
+                                        Animation::new_image_node(
+                                            0,
+                                            3,
+                                            Timer::from_seconds(0.25, TimerMode::Repeating),
+                                        ),
+                                    ));
+
+                                parent
+                                    .spawn(Node {
+                                        height: Val::Px(75.),
+                                        display: Display::Flex,
+                                        justify_content: JustifyContent::FlexEnd,
+                                        align_items: AlignItems::Center,
+                                        ..default()
+                                    })
+                                    .with_child((
+                                        Text::new("3 Heart Damage"),
+                                        TextColor(Color::WHITE),
+                                        TextFont {
+                                            font: font_assets.default_font.clone(),
+                                            font_size: 28.,
+                                            ..default()
+                                        },
+                                    ));
+                            });
+                    });
+            }
+            _ => {}
+        }
     }
 }
