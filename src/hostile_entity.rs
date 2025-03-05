@@ -1,6 +1,7 @@
 use crate::{
     colliders::ColliderBundle,
     player::{ContinueTakingDamage, HealthBar, PlayerEntity},
+    sprite_animation::Animation,
     GameState,
 };
 use bevy::prelude::*;
@@ -20,7 +21,10 @@ impl Plugin for HostilePlugin {
 }
 
 #[derive(better_default::Default, Bundle, LdtkEntity)]
-#[default(active_events: ActiveEvents::COLLISION_EVENTS)]
+#[default(
+    active_events: ActiveEvents::COLLISION_EVENTS,
+    animation: Animation::new(0, 3, Timer::from_seconds(0.25, TimerMode::Repeating))
+)]
 pub struct Hostile {
     #[sprite_sheet]
     pub sprite_sheet: Sprite,
@@ -30,6 +34,7 @@ pub struct Hostile {
     pub patrol: Patrol,
     pub active_events: ActiveEvents,
     hostile_entity: HostileEntity,
+    pub animation: Animation,
 }
 
 #[derive(Default, Component)]
@@ -83,8 +88,8 @@ impl LdtkEntity for Patrol {
     }
 }
 
-pub fn patrol(mut query: Query<(&mut Transform, &mut Velocity, &mut Patrol)>) {
-    for (mut transform, mut velocity, mut patrol) in &mut query {
+pub fn patrol(mut query: Query<(&mut Transform, &mut Velocity, &mut Patrol, &mut Sprite)>) {
+    for (mut transform, mut velocity, mut patrol, mut sprite) in &mut query {
         if patrol.points.len() <= 1 {
             continue;
         }
@@ -95,8 +100,10 @@ pub fn patrol(mut query: Query<(&mut Transform, &mut Velocity, &mut Patrol)>) {
         if new_velocity.dot(velocity.linvel) < 0. {
             if patrol.index == 0 {
                 patrol.forward = true;
+                sprite.flip_x = false;
             } else if patrol.index == patrol.points.len() - 1 {
                 patrol.forward = false;
+                sprite.flip_x = true;
             }
 
             transform.translation.x = patrol.points[patrol.index].x;
@@ -124,8 +131,8 @@ fn damage_player(
 ) {
     for collision in collision_events.read() {
         let (player_entity, mut player_healtbar) = player_query.single_mut();
-        match collision {
-            &CollisionEvent::Started(entity_one, entity_two, ..) => {
+        match *collision {
+            CollisionEvent::Started(entity_one, entity_two, ..) => {
                 if entity_one == player_entity || entity_two == player_entity {
                     for hostile_entity in &hostile_query {
                         if entity_two == hostile_entity || entity_one == hostile_entity {
@@ -137,7 +144,7 @@ fn damage_player(
                     }
                 }
             }
-            &CollisionEvent::Stopped(entity_one, entity_two, ..) => {
+            CollisionEvent::Stopped(entity_one, entity_two, ..) => {
                 if entity_one == player_entity || entity_two == player_entity {
                     for hostile_entity in &hostile_query {
                         if entity_two == hostile_entity || entity_one == hostile_entity {

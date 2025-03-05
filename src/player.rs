@@ -4,37 +4,13 @@ use crate::{
     ground_detection::{GroundDetection, GroundDetectionPlugin},
     level_manager::CurrentLevelInfo,
     screens::despawn_screen,
+    sprite_animation::Animation,
     time::RecordTimeEvent,
     GameState,
 };
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::Velocity;
-
-pub const PLAYER_WIDTH: f32 = 16.;
-pub const PLAYER_HEIGHT: f32 = 32.;
-
-#[derive(Default, Bundle, LdtkEntity)]
-pub struct Player {
-    #[sprite_sheet]
-    pub sprite: Sprite,
-    #[grid_coords]
-    pub grid_coords: GridCoords,
-    pub player_entity: PlayerEntity,
-    #[from_entity_instance]
-    pub collider_bundle: ColliderBundle,
-    pub ground_detection: GroundDetection,
-    pub health_bar: HealthBar,
-}
-
-#[derive(Default, Component)]
-pub struct PlayerEntity;
-
-#[derive(better_default::Default, Component)]
-#[default(health: 6)]
-pub struct HealthBar {
-    pub health: u8,
-}
 
 pub struct PlayerPlugin;
 
@@ -62,14 +38,62 @@ impl Plugin for PlayerPlugin {
     }
 }
 
+pub const PLAYER_WIDTH: f32 = 16.;
+pub const PLAYER_HEIGHT: f32 = 32.;
+
+#[derive(better_default::Default, Bundle, LdtkEntity)]
+#[default(animation: Animation::new_with_custom_tiles(vec![1, 4, 7, 10, 13, 16, 19], Timer::from_seconds(0.25, TimerMode::Repeating)))]
+pub struct Player {
+    #[sprite_sheet]
+    pub sprite: Sprite,
+    #[grid_coords]
+    pub grid_coords: GridCoords,
+    pub player_entity: PlayerEntity,
+    #[from_entity_instance]
+    pub collider_bundle: ColliderBundle,
+    pub ground_detection: GroundDetection,
+    pub health_bar: HealthBar,
+    pub player_state: PlayerState,
+    pub animation: Animation,
+}
+
+#[derive(Default, Component)]
+pub struct PlayerEntity;
+
+#[derive(Default, Component)]
+pub enum PlayerState {
+    #[default]
+    Idle,
+    Moving,
+    Falling,
+    Dead,
+    Hurt,
+}
+
+#[derive(better_default::Default, Component)]
+#[default(health: 6)]
+pub struct HealthBar {
+    pub health: u8,
+}
+
 // TODO: Add auto-snip to the diagonal tiles
 fn player_movement(
     input: Res<ButtonInput<KeyCode>>,
-    mut query: Query<(&mut Velocity, &GroundDetection), With<PlayerEntity>>,
+    mut query: Query<(&mut Velocity, &GroundDetection, &mut Sprite), With<PlayerEntity>>,
 ) {
-    for (mut velocity, ground_detection) in &mut query {
-        let right = if input.pressed(KeyCode::KeyD) { 1. } else { 0. };
-        let left = if input.pressed(KeyCode::KeyA) { 1. } else { 0. };
+    for (mut velocity, ground_detection, mut player_sprite) in &mut query {
+        let right = if input.pressed(KeyCode::KeyD) {
+            player_sprite.flip_x = false;
+            1.
+        } else {
+            0.
+        };
+        let left = if input.pressed(KeyCode::KeyA) {
+            player_sprite.flip_x = true;
+            1.
+        } else {
+            0.
+        };
 
         velocity.linvel.x = (right - left) * 200.;
 
@@ -102,6 +126,7 @@ fn spawn_healthbar(mut commands: Commands) {
     ));
 }
 
+#[allow(clippy::too_many_arguments)]
 fn sync_healthbar(
     health_bar_query: Query<&HealthBar, (With<PlayerEntity>, Changed<HealthBar>)>,
     health_bar_context_query: Query<Entity, With<HealthBarContext>>,

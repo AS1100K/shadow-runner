@@ -6,6 +6,7 @@ use hostile_entity::HostilePlugin;
 use level_manager::LevelManager;
 use player::PlayerPlugin;
 use screens::ScreensPlugin;
+use sprite_animation::SpriteAnimationPlugin;
 use time::TimeTakenPlugin;
 use tutorial::GameTutorialPlugin;
 use walls::WallPlugin;
@@ -19,6 +20,7 @@ pub mod level_manager;
 pub mod physics;
 pub mod player;
 pub mod screens;
+pub mod sprite_animation;
 pub mod time;
 pub mod tutorial;
 pub mod walls;
@@ -33,7 +35,8 @@ impl Plugin for EntitySpawnerPlugin {
         app.add_systems(OnEnter(assets::AssetsLoadingState::Loaded), spawn_basic)
             .add_plugins(WallPlugin)
             .add_plugins(PlayerPlugin)
-            .add_plugins(HostilePlugin);
+            .add_plugins(HostilePlugin)
+            .add_plugins(SpriteAnimationPlugin);
     }
 }
 

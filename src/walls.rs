@@ -257,6 +257,7 @@ pub fn spawn_wall_collisions(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn read_collisions(
     mut collision_events: EventReader<CollisionEvent>,
     player_query: Query<Entity, With<PlayerEntity>>,

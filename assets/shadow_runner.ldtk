@@ -11,7 +11,7 @@
 	"iid": "e052a7f0-e920-11ef-9cc5-0120e51435d4",
 	"jsonVersion": "1.5.3",
 	"appBuildId": 473703,
-	"nextUid": 36,
+	"nextUid": 37,
 	"identifierStyle": "Capitalize",
 	"toc": [],
 	"worldLayout": "LinearHorizontal",
@@ -228,8 +228,8 @@
 			"exportToToc": false,
 			"allowOutOfBounds": false,
 			"doc": null,
-			"width": 48,
-			"height": 64,
+			"width": 16,
+			"height": 32,
 			"resizableX": false,
 			"resizableY": false,
 			"minWidth": null,
@@ -246,12 +246,12 @@
 			"showName": true,
 			"tilesetId": 2,
 			"tileRenderMode": "FitInside",
-			"tileRect": { "tilesetUid": 2, "x": 48, "y": 0, "w": 48, "h": 64 },
-			"uiTileRect": { "tilesetUid": 2, "x": 48, "y": 0, "w": 48, "h": 64 },
+			"tileRect": { "tilesetUid": 2, "x": 16, "y": 0, "w": 16, "h": 32 },
+			"uiTileRect": { "tilesetUid": 2, "x": 16, "y": 0, "w": 16, "h": 32 },
 			"nineSliceBorders": [],
 			"maxCount": 1,
 			"limitScope": "PerLevel",
-			"limitBehavior": "MoveLastOne",
+			"limitBehavior": "PreventAdding",
 			"pivotX": 0.5,
 			"pivotY": 0.5,
 			"fieldDefs": []
@@ -326,46 +326,6 @@
 					"allowedRefsEntityUid": null,
 					"allowedRefTags": [],
 					"tilesetUid": null
-				},
-				{
-					"identifier": "sprite",
-					"doc": null,
-					"__type": "Array<Tile>",
-					"uid": 35,
-					"type": "F_Tile",
-					"isArray": true,
-					"canBeNull": true,
-					"arrayMinLength": 4,
-					"arrayMaxLength": null,
-					"editorDisplayMode": "EntityTile",
-					"editorDisplayScale": 1,
-					"editorDisplayPos": "Above",
-					"editorLinkStyle": "StraightArrow",
-					"editorDisplayColor": null,
-					"editorAlwaysShow": false,
-					"editorShowInWorld": true,
-					"editorCutLongValues": true,
-					"editorTextSuffix": null,
-					"editorTextPrefix": null,
-					"useForSmartColor": false,
-					"exportToToc": false,
-					"searchable": false,
-					"min": null,
-					"max": null,
-					"regex": null,
-					"acceptFileTypes": null,
-					"defaultOverride": {
-						"id": "V_String",
-						"params": ["0,0,16,16"]
-					},
-					"textLanguageMode": null,
-					"symmetricalRef": false,
-					"autoChainRef": true,
-					"allowOutOfLevelRef": true,
-					"allowedRefs": "OnlySame",
-					"allowedRefsEntityUid": null,
-					"allowedRefTags": [],
-					"tilesetUid": 32
 				}
 			]
 		}
@@ -393,14 +353,14 @@
 			}
 		},
 		{
-			"__cWid": 125,
-			"__cHei": 4,
+			"__cWid": 24,
+			"__cHei": 2,
 			"identifier": "Character",
 			"uid": 2,
-			"relPath": "Legacy_Adventure_Pack/Character.png",
+			"relPath": "character/running.png",
 			"embedAtlas": null,
-			"pxWid": 1999,
-			"pxHei": 64,
+			"pxWid": 384,
+			"pxHei": 32,
 			"tileGridSize": 16,
 			"spacing": 0,
 			"padding": 0,
@@ -410,8 +370,8 @@
 			"customData": [],
 			"savedSelections": [],
 			"cachedPixelData": {
-				"opaqueTiles": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001",
-				"averageColors": "00000000000005323421000000000000053224210000000000003fdb265400000000000005325a994edd0000000000001532021100000000000034320000000000000532342101110000000005322421000000000000053224210000000000000000143100000000000000002432000000000000000024320000000000000000243200000000000000001432000000000000000014320000000000000532242100000000000005322421000000000000053214210000000000000000000000000000000000000000000000000000000000000000000000002432b6320000000000002532863100000000000000000532132100000000000000000000000000001532e7441433000000002532e7430555000000003866d8540000000000001543e9566edc000000000c81d84537532ddd00001544e8551111000000001432e8531322000000002532e7430555000000001432e7530555000000001432d7540000000000000432c7530fec000000000431d8541fec000000000431d8651fec000000000431d7441fec000000001432d7530fec000000001432d8530000000000002532e7430555000000004632b8540000000000006542873300000000000065310111000000000000000000000000000000003b88e7540000000000005b89d74400000000000000005642d64300000000000000000000000000000333d9751544000000001ba4d8651333000000001ec497430000000000003b6999560000000000001d89b9566edc4edd00002c78a9576edc000000001ca5c8552edb000000001ba5d9661333000000002a7699760333000000001862aa860fec000000001c8899751fec00000000396788540000000000002a6788540000000000002b6799650fec000000001b7799651fec0000000027448a760fec000000001ba5d9661333000000002c98e7541333000000003a87d754232200000000a8547754122200002531786429871332000000001d994a870000000000001fec77430000000000001fec6ca8c633000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+				"opaqueTiles": "000000000000000000000000000000000000000000000000",
+				"averageColors": "000064350000000064350000000054350000000064350000000064350000000054350000000054350000000064350000000086450000000086450000000076450000000086450000000086550000000086550000000086550000000086450000"
 			}
 		},
 		{
@@ -479,7 +439,22 @@
 					"seed": 8555701,
 					"overrideTilesetUid": null,
 					"gridTiles": [],
-					"entityInstances": []
+					"entityInstances": [
+						{
+							"__identifier": "Player",
+							"__grid": [6,32],
+							"__pivot": [0.5,0.5],
+							"__tags": [],
+							"__tile": { "tilesetUid": 2, "x": 16, "y": 0, "w": 16, "h": 32 },
+							"__smartColor": "#BE4A2F",
+							"iid": "a6fa0190-e920-11ef-8f1a-ffbb8002d89d",
+							"width": 16,
+							"height": 32,
+							"defUid": 3,
+							"px": [104,520],
+							"fieldInstances": []
+						}
+					]
 				},
 				{
 					"__identifier": "Collider",
@@ -633,22 +608,7 @@
 					"seed": 9842057,
 					"overrideTilesetUid": null,
 					"gridTiles": [],
-					"entityInstances": [
-						{
-							"__identifier": "Player",
-							"__grid": [6,33],
-							"__pivot": [0.5,0.5],
-							"__tags": [],
-							"__tile": { "tilesetUid": 2, "x": 48, "y": 0, "w": 48, "h": 64 },
-							"__smartColor": "#BE4A2F",
-							"iid": "a6fa0190-e920-11ef-8f1a-ffbb8002d89d",
-							"width": 48,
-							"height": 64,
-							"defUid": 3,
-							"px": [96,528],
-							"fieldInstances": []
-						}
-					]
+					"entityInstances": []
 				},
 				{
 					"__identifier": "Assets",
@@ -1265,7 +1225,7 @@
 					"__pxTotalOffsetX": 0,
 					"__pxTotalOffsetY": 0,
 					"__tilesetDefUid": 2,
-					"__tilesetRelPath": "Legacy_Adventure_Pack/Character.png",
+					"__tilesetRelPath": "character/running.png",
 					"iid": "6a712ae0-e920-11ef-8f1a-f7d3133f8058",
 					"levelId": 0,
 					"layerDefUid": 4,
@@ -1277,25 +1237,7 @@
 					"autoLayerTiles": [],
 					"seed": 4989947,
 					"overrideTilesetUid": null,
-					"gridTiles": [
-						{ "px": [80,368], "src": [0,0], "f": 0, "t": 0, "d": [1845], "a": 1 },
-						{ "px": [96,384], "src": [0,0], "f": 0, "t": 0, "d": [1926], "a": 1 },
-						{ "px": [96,400], "src": [0,0], "f": 0, "t": 0, "d": [2006], "a": 1 },
-						{ "px": [112,464], "src": [16,48], "f": 0, "t": 376, "d": [2327], "a": 1 },
-						{ "px": [48,528], "src": [80,0], "f": 0, "t": 5, "d": [2643], "a": 1 },
-						{ "px": [16,576], "src": [48,48], "f": 0, "t": 378, "d": [2881], "a": 1 },
-						{ "px": [32,576], "src": [64,48], "f": 0, "t": 379, "d": [2882], "a": 1 },
-						{ "px": [48,576], "src": [80,48], "f": 0, "t": 380, "d": [2883], "a": 1 },
-						{ "px": [80,576], "src": [16,48], "f": 0, "t": 376, "d": [2885], "a": 1 },
-						{ "px": [96,592], "src": [16,48], "f": 0, "t": 376, "d": [2966], "a": 1 },
-						{ "px": [80,608], "src": [16,48], "f": 0, "t": 376, "d": [3045], "a": 1 },
-						{ "px": [96,608], "src": [16,48], "f": 0, "t": 376, "d": [3046], "a": 1 },
-						{ "px": [128,608], "src": [16,48], "f": 0, "t": 376, "d": [3048], "a": 1 },
-						{ "px": [96,624], "src": [16,48], "f": 0, "t": 376, "d": [3126], "a": 1 },
-						{ "px": [112,624], "src": [16,48], "f": 0, "t": 376, "d": [3127], "a": 1 },
-						{ "px": [112,640], "src": [16,48], "f": 0, "t": 376, "d": [3207], "a": 1 },
-						{ "px": [128,640], "src": [16,48], "f": 0, "t": 376, "d": [3208], "a": 1 }
-					],
+					"gridTiles": [],
 					"entityInstances": []
 				}
 			],
@@ -1348,7 +1290,7 @@
 					"entityInstances": [
 						{
 							"__identifier": "Sand_Ghoul",
-							"__grid": [37,19],
+							"__grid": [38,19],
 							"__pivot": [0.5,0.5],
 							"__tags": [],
 							"__tile": { "tilesetUid": 32, "x": 0, "y": 0, "w": 16, "h": 16 },
@@ -1357,28 +1299,25 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 31,
-							"px": [600,312],
-							"fieldInstances": [
-								{ "__identifier": "patrol", "__type": "Array<Point>", "__value": [{ "cx": 43, "cy": 19 }], "__tile": null, "defUid": 34, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["43,19"]
-								}] },
-								{ "__identifier": "sprite", "__type": "Array<Tile>", "__value": [
-									{ "tilesetUid": 32, "x": 0, "y": 0, "w": 16, "h": 16 },
-									{ "tilesetUid": 32, "x": 16, "y": 0, "w": 16, "h": 16 },
-									{ "tilesetUid": 32, "x": 32, "y": 0, "w": 16, "h": 16 },
-									{ "tilesetUid": 32, "x": 48, "y": 0, "w": 16, "h": 16 }
-								], "__tile": { "tilesetUid": 32, "x": 0, "y": 0, "w": 16, "h": 16 }, "defUid": 35, "realEditorValues": [ null, {
-									"id": "V_String",
-									"params": ["16,0,16,16"]
-								}, {
-									"id": "V_String",
-									"params": ["32,0,16,16"]
-								}, {
-									"id": "V_String",
-									"params": ["48,0,16,16"]
-								} ] }
-							]
+							"px": [616,312],
+							"fieldInstances": [{ "__identifier": "patrol", "__type": "Array<Point>", "__value": [{ "cx": 43, "cy": 19 }], "__tile": null, "defUid": 34, "realEditorValues": [{
+								"id": "V_String",
+								"params": ["43,19"]
+							}] }]
+						},
+						{
+							"__identifier": "Player",
+							"__grid": [2,37],
+							"__pivot": [0.5,0.5],
+							"__tags": [],
+							"__tile": { "tilesetUid": 2, "x": 16, "y": 0, "w": 16, "h": 32 },
+							"__smartColor": "#BE4A2F",
+							"iid": "d1af9280-e920-11ef-8467-c73a5e07e33f",
+							"width": 16,
+							"height": 32,
+							"defUid": 3,
+							"px": [40,600],
+							"fieldInstances": []
 						}
 					]
 				},
@@ -1398,7 +1337,7 @@
 					"layerDefUid": 25,
 					"pxOffsetX": 0,
 					"pxOffsetY": 0,
-					"visible": false,
+					"visible": true,
 					"optionalRules": [],
 					"intGridCsv": [
 						2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
@@ -1534,22 +1473,7 @@
 					"seed": 479789,
 					"overrideTilesetUid": null,
 					"gridTiles": [],
-					"entityInstances": [
-						{
-							"__identifier": "Player",
-							"__grid": [2,37],
-							"__pivot": [0.5,0.5],
-							"__tags": [],
-							"__tile": { "tilesetUid": 2, "x": 48, "y": 0, "w": 48, "h": 64 },
-							"__smartColor": "#BE4A2F",
-							"iid": "c912b5d0-e920-11ef-8b1b-6913266cb11a",
-							"width": 48,
-							"height": 64,
-							"defUid": 3,
-							"px": [40,600],
-							"fieldInstances": []
-						}
-					]
+					"entityInstances": []
 				},
 				{
 					"__identifier": "Assets",
@@ -2251,7 +2175,7 @@
 					"__pxTotalOffsetX": 0,
 					"__pxTotalOffsetY": 0,
 					"__tilesetDefUid": 2,
-					"__tilesetRelPath": "Legacy_Adventure_Pack/Character.png",
+					"__tilesetRelPath": "character/running.png",
 					"iid": "e6572c44-e920-11ef-a264-115e4c093595",
 					"levelId": 30,
 					"layerDefUid": 4,
