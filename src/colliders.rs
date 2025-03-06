@@ -35,13 +35,15 @@ impl From<&EntityInstance> for ColliderBundle {
                 velocity: Maybe::new(Velocity::default()),
                 ..default()
             },
-            "Sand_Ghoul" | "Grave_Revenant" | "Mutilated_Stumbler" => ColliderBundle {
-                rigid_body: Maybe::new(RigidBody::KinematicVelocityBased),
-                collider: Collider::cuboid(GRID_SIZE as f32 / 2., GRID_SIZE as f32 / 2.),
-                rotation_constraints,
-                velocity: Maybe::new(Velocity::default()),
-                ..default()
-            },
+            "Sand_Ghoul" | "Grave_Revenant" | "Mutilated_Stumbler" | "Adept_Necromancer" => {
+                ColliderBundle {
+                    rigid_body: Maybe::new(RigidBody::KinematicVelocityBased),
+                    collider: Collider::cuboid(GRID_SIZE as f32 / 2., GRID_SIZE as f32 / 2.),
+                    rotation_constraints,
+                    velocity: Maybe::new(Velocity::default()),
+                    ..default()
+                }
+            }
             _ => ColliderBundle::default(),
         }
     }

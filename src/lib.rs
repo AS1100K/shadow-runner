@@ -2,6 +2,7 @@ use assets::AssetsManagerPlugin;
 use bevy::prelude::*;
 use bevy::utils::{Duration, Instant};
 use bevy_ecs_ldtk::LdtkWorldBundle;
+use bevy_light_2d::plugin::Light2dPlugin;
 use hostile_entity::HostilePlugin;
 use level_manager::LevelManager;
 use player::PlayerPlugin;
@@ -38,6 +39,7 @@ impl Plugin for EntitySpawnerPlugin {
         app.add_systems(OnEnter(assets::AssetsLoadingState::Loaded), spawn_basic)
             .add_plugins(WallPlugin)
             .add_plugins(SpecialTilesPlugin)
+            .add_plugins(Light2dPlugin)
             .add_plugins(PlayerPlugin)
             .add_plugins(HostilePlugin)
             .add_plugins(SpriteAnimationPlugin);
@@ -57,7 +59,7 @@ pub struct BasePlugin;
 impl Plugin for BasePlugin {
     fn build(&self, app: &mut App) {
         app.insert_state(GameState::default())
-            .insert_resource(Time::<Fixed>::from_seconds(1.))
+            .insert_resource(Time::<Fixed>::from_seconds(0.5))
             .add_plugins(AssetsManagerPlugin)
             .add_plugins(ScreensPlugin)
             .add_plugins(LevelManager)

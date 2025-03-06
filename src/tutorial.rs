@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use crate::{
     assets::{EntitySpriteAssets, FontAssets, IconsAssets},
     level_manager::CurrentLevelInfo,
@@ -8,6 +6,7 @@ use crate::{
     AutoDespawn, GameState,
 };
 use bevy::prelude::*;
+use bevy::utils::Duration;
 
 pub struct GameTutorialPlugin;
 
@@ -605,10 +604,7 @@ fn update_level_specific_context(
                                         Animation::new_image_node(
                                             0,
                                             5,
-                                            Timer::new(
-                                                Duration::from_secs_f32(0.25),
-                                                TimerMode::Repeating,
-                                            ),
+                                            Timer::from_seconds(0.25, TimerMode::Repeating),
                                         ),
                                     ));
 
@@ -623,6 +619,47 @@ fn update_level_specific_context(
                                     },
                                 ));
                             });
+                    });
+            }
+            4 => {
+                commands
+                    .spawn((
+                        AutoDespawn::new_recursive_despawn(Duration::from_secs(30)),
+                        Node {
+                            position_type: PositionType::Absolute,
+                            right: Val::Px(10.),
+                            bottom: Val::Px(10.),
+                            display: Display::Flex,
+                            justify_content: JustifyContent::Center,
+                            align_items: AlignItems::Center,
+                            column_gap: Val::Px(20.),
+                            ..default()
+                        },
+                    ))
+                    .with_children(|parent| {
+                        // Spawn Image
+                        parent
+                            .spawn(Node {
+                                width: Val::Px(75.),
+                                height: Val::Px(75.),
+                                ..default()
+                            })
+                            .with_child((ImageNode {
+                                image: entity_sprite_assets.adept_necromancer.clone(),
+                                texture_atlas: Some(entity_sprite_assets.layout.clone().into()),
+                                ..default()
+                            }, Animation::new_image_node(0, 3, Timer::from_seconds(0.25, TimerMode::Repeating))));
+
+                        // Spawn Text
+                        parent.spawn((
+                            Text::new("Adept Necromancer:\nA power being with\nthe ability to blind you.\nDeals 1 Heart Damage"),
+                            TextColor::WHITE,
+                            TextFont {
+                                font: font_assets.default_font.clone(),
+                                font_size: 33.,
+                                ..default()
+                            },
+                        ));
                     });
             }
             _ => {}

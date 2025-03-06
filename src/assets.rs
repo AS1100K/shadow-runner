@@ -60,6 +60,8 @@ pub struct EntitySpriteAssets {
     pub grave_revenant: Handle<Image>,
     #[asset(path = "hostile/Mutilated Stumbler/MutilatedStumbler.png")]
     pub mutilated_stumbler: Handle<Image>,
+    #[asset(path = "hostile/Adept Necromancer/AdeptNecromancer.png")]
+    pub adept_necromancer: Handle<Image>,
 
     // Player
     #[asset(texture_atlas_layout(

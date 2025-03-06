@@ -1,8 +1,9 @@
 use crate::{
     colliders::ColliderBundle,
-    player::{ContinueTakingDamage, HealthBar, PlayerEntity},
+    player::{Blinded, ContinueTakingDamage, HealthBar, PlayerEntity},
     sprite_animation::Animation,
-    GameState,
+    utils::Maybe,
+    GameState, GRID_SIZE,
 };
 use bevy::prelude::*;
 use bevy_ecs_ldtk::{prelude::*, utils::ldtk_pixel_coords_to_translation_pivoted};
@@ -15,9 +16,14 @@ impl Plugin for HostilePlugin {
         app.register_ldtk_entity::<Hostile>("Sand_Ghoul")
             .register_ldtk_entity::<Hostile>("Grave_Revenant")
             .register_ldtk_entity::<Hostile>("Mutilated_Stumbler")
+            .register_ldtk_entity::<Hostile>("Adept_Necromancer")
             .add_systems(
                 Update,
                 (patrol, damage_player).run_if(in_state(GameState::PlayingScreen)),
+            )
+            .add_systems(
+                FixedUpdate,
+                blinding_power.run_if(in_state(GameState::PlayingScreen)),
             );
     }
 }
@@ -39,10 +45,24 @@ pub struct Hostile {
     pub animation: Animation,
     #[from_entity_instance]
     pub damage_count: DamageCount,
+    #[from_entity_instance]
+    pub blindness_power: Maybe<BlindnessPower>,
 }
 
 #[derive(Default, Component)]
 pub struct HostileEntity;
+
+#[derive(Default, Component)]
+pub struct BlindnessPower;
+
+impl From<&EntityInstance> for Maybe<BlindnessPower> {
+    fn from(value: &EntityInstance) -> Self {
+        if value.identifier == "Adept_Necromancer" {
+            return Self::new(BlindnessPower);
+        }
+        Self::NONE
+    }
+}
 
 #[derive(Default, Component)]
 pub struct DamageCount(pub u8);
@@ -50,7 +70,7 @@ pub struct DamageCount(pub u8);
 impl From<&EntityInstance> for DamageCount {
     fn from(value: &EntityInstance) -> Self {
         match value.identifier.as_str() {
-            "Sand_Ghoul" => DamageCount(1),
+            "Sand_Ghoul" | "Adept_Necromancer" => DamageCount(1),
             "Grave_Revenant" => DamageCount(2),
             "Mutilated_Stumbler" => DamageCount(3),
             _ => DamageCount(0),
@@ -182,6 +202,29 @@ fn damage_player(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+#[allow(clippy::type_complexity)]
+fn blinding_power(
+    player_query: Query<(Entity, &Transform), (Without<Blinded>, With<PlayerEntity>)>,
+    blinding_power_entity: Query<&Transform, (With<BlindnessPower>, With<HostileEntity>)>,
+    mut commands: Commands,
+) {
+    for (entity, player_transform) in &player_query {
+        for blinding_power_transform in &blinding_power_entity {
+            if player_transform
+                .translation
+                .truncate()
+                .distance(blinding_power_transform.translation.truncate())
+                <= (GRID_SIZE as f32 * 5.)
+            {
+                log::info!("Detected Player, Effecting with Blindness");
+                commands
+                    .entity(entity)
+                    .insert(Blinded(Timer::from_seconds(15., TimerMode::Once)));
             }
         }
     }

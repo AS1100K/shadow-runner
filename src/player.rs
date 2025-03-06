@@ -1,15 +1,17 @@
 use crate::{
     assets::{AssetsLoadingState, EntitySpriteAssets, IconsAssets},
+    camera::MainCamera,
     colliders::ColliderBundle,
     ground_detection::{GroundDetection, GroundDetectionPlugin},
     level_manager::CurrentLevelInfo,
     screens::despawn_screen,
     sprite_animation::Animation,
     time::RecordTimeEvent,
-    GameState,
+    GameState, GRID_SIZE,
 };
-use bevy::prelude::*;
+use bevy::{color::palettes::css::YELLOW, prelude::*};
 use bevy_ecs_ldtk::prelude::*;
+use bevy_light_2d::prelude::{AmbientLight2d, PointLight2d};
 use bevy_rapier2d::prelude::Velocity;
 
 pub struct PlayerPlugin;
@@ -29,7 +31,12 @@ impl Plugin for PlayerPlugin {
             )
             .add_systems(
                 Update,
-                (sync_healthbar, handle_player_animation)
+                (
+                    sync_healthbar,
+                    handle_player_animation,
+                    add_blindness,
+                    update_blindness,
+                )
                     .run_if(in_state(GameState::PlayingScreen)),
             )
             .add_systems(
@@ -73,6 +80,10 @@ pub enum PlayerState {
 pub struct HealthBar {
     pub health: u8,
 }
+
+/// Represents that an Entity is blind
+#[derive(Default, Component)]
+pub struct Blinded(pub Timer);
 
 // TODO: Add auto-snip to the diagonal tiles
 fn player_movement(
@@ -201,6 +212,55 @@ fn continue_taking_damage(mut query: Query<(&mut HealthBar, &ContinueTakingDamag
             health_bar.health -= 1;
         } else {
             health_bar.health = 0;
+        }
+    }
+}
+
+fn add_blindness(
+    main_camera_query: Query<Entity, With<MainCamera>>,
+    player_query: Query<Entity, (With<PlayerEntity>, Added<Blinded>)>,
+    mut commands: Commands,
+) {
+    for player in &player_query {
+        log::info!("Adding Blindness");
+        commands.entity(player).insert(PointLight2d {
+            radius: GRID_SIZE as f32 * 4.,
+            color: Color::Srgba(YELLOW),
+            intensity: 0.8,
+            ..default()
+        });
+
+        for main_camera in &main_camera_query {
+            commands.entity(main_camera).insert(AmbientLight2d {
+                brightness: 0.,
+                ..default()
+            });
+        }
+    }
+}
+
+fn update_blindness(
+    mut player_query: Query<(Entity, &mut Blinded), With<PlayerEntity>>,
+    main_camera_query: Query<Entity, With<MainCamera>>,
+    time: Res<Time<Virtual>>,
+    mut commands: Commands,
+) {
+    for (player, mut blinded) in &mut player_query {
+        blinded.0.tick(time.delta());
+
+        if blinded.0.finished() {
+            log::info!("Removing Blindness");
+            commands
+                .entity(player)
+                .remove::<Blinded>()
+                .insert(PointLight2d {
+                    intensity: 1.,
+                    ..default()
+                });
+
+            for main_camera in &main_camera_query {
+                commands.entity(main_camera).remove::<AmbientLight2d>();
+            }
         }
     }
 }

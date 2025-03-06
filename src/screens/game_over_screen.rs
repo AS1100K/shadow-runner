@@ -1,11 +1,13 @@
 use super::despawn_screen;
 use crate::{
     assets::*,
+    camera::MainCamera,
     time::{convert_time_to_text, RestartTimeEvent, TimeTakenRes},
     GameState,
 };
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
+use bevy_light_2d::light::AmbientLight2d;
 
 pub struct GameOverPlugin;
 
@@ -138,6 +140,7 @@ fn spawn_screen(
 #[allow(clippy::too_many_arguments)]
 fn restart_game(
     query: Query<&Interaction, (With<RestartGameButton>, Changed<Interaction>)>,
+    main_camera_query: Query<Entity, With<MainCamera>>,
     level_selection: Res<LevelSelection>,
     levels: Query<(Entity, &LevelIid)>,
     ldtk_projects: Query<&LdtkProjectHandle>,
@@ -179,6 +182,9 @@ fn restart_game(
                     commands.entity(level_entity).insert(Respawn);
                     next_game_state.set(GameState::PlayingScreen);
                     time.unpause();
+
+                    let main_camera = main_camera_query.single();
+                    commands.entity(main_camera).remove::<AmbientLight2d>();
 
                     return;
                 }

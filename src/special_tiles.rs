@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use crate::{
     colliders::ColliderBundle, hostile_entity::DamageCount, player::PlayerEntity,
     sprite_animation::Animation, walls::GlobalWallEntity, GameState,
@@ -31,15 +29,16 @@ pub struct JumpBooster {
 }
 
 #[derive(better_default::Default, Component)]
-#[default(boost_velocty: 500.)]
+#[default(boost_velocty: 500., boost_cap: 650.)]
 pub struct JumpBoosterEntity {
     pub boost_velocty: f32,
+    pub boost_cap: f32,
 }
 
 #[derive(better_default::Default, Bundle, LdtkIntCell)]
 #[default(
     damage_count: DamageCount(1),
-    animation: Animation::new(0, 5, Timer::new(Duration::from_secs_f32(0.25), TimerMode::Repeating)),
+    animation: Animation::new(0, 5, Timer::from_seconds(0.25, TimerMode::Repeating)),
     active_events: ActiveEvents::COLLISION_EVENTS
 )]
 pub struct Spike {
@@ -67,7 +66,13 @@ fn jump_booster_collision_event(
             if entity_one == player_entity || entity_two == player_entity {
                 for (jump_booster_entity, jump_booster) in &jump_booster_query {
                     if entity_two == jump_booster_entity || entity_one == jump_booster_entity {
-                        player_velocty.linvel.y = jump_booster.boost_velocty;
+                        let mut new_velocity = jump_booster.boost_velocty - player_velocty.linvel.y;
+
+                        if new_velocity > jump_booster.boost_cap {
+                            new_velocity = jump_booster.boost_cap;
+                        }
+
+                        player_velocty.linvel.y = new_velocity;
                         return;
                     }
                 }
