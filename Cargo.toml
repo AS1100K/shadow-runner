@@ -7,7 +7,7 @@ edition = "2021"
 debug = ["bevy_rapier2d/debug-render-2d"]
 
 [dependencies]
-bevy = "0.15"
+bevy = { version = "0.15", features = ["webgpu"] }
 bevy_rapier2d = "0.29"
 bevy_ecs_ldtk = "0.11"
 bevy_ecs_tilemap = "0.15"
@@ -22,9 +22,3 @@ opt-level = 3
 codegen-units = 1
 incremental = false
 panic = "abort"
-
-[profile.release-wasm]
-inherits = "release"
-codegen-units = 16
-incremental = true
-opt-level = "z"

@@ -74,6 +74,12 @@ jobs:
           large-packages: false
           docker-images: true
           swap-storage: true
+      - name: Minify JSON
+        uses: StefanEnsmann/Minify-JSON-Action@1.1.0
+        with:
+          input_file: assets/shadow-runner.ldtk
+      - name: Debug output
+        run: cat assets/shadow-runner.ldtk
       - uses: rs-workspace/rust-toolchain@v0.2.0
       - name: Install Rust Toolchain for WASM
         run: rustup target install wasm32-unknown-unknown
@@ -83,7 +89,7 @@ jobs:
 
       - name: Build
         run: |
-          cargo build --profile "release-wasm" --target wasm32-unknown-unknown
+          cargo build --release --target wasm32-unknown-unknown
 
       - name: Prepare package
         run: |
@@ -147,6 +153,10 @@ jobs:
           large-packages: false
           docker-images: true
           swap-storage: true
+      - name: Minify JSON
+        uses: StefanEnsmann/Minify-JSON-Action@1.1.0
+        with:
+          input_file: assets/shadow-runner.ldtk
       - uses: rs-workspace/rust-toolchain@v0.2.0
       - name: install dependencies
         run: |
@@ -207,6 +217,12 @@ jobs:
         with:
           lfs: ${{ env.use_git_lfs }}
           ref: ${{ steps.get_version.outputs.tag }}
+
+      - name: Minify JSON
+        uses: StefanEnsmann/Minify-JSON-Action@1.1.0
+        with:
+          input_file: assets/shadow-runner.ldtk
+
       - uses: rs-workspace/rust-toolchain@v0.2.0
 
       - name: Build
@@ -321,6 +337,10 @@ jobs:
         with:
           lfs: ${{ env.use_git_lfs }}
           ref: ${{ steps.get_version.outputs.tag }}
+      - name: Minify JSON
+        uses: StefanEnsmann/Minify-JSON-Action@1.1.0
+        with:
+          input_file: assets/shadow-runner.ldtk
       - uses: rs-workspace/rust-toolchain@v0.2.0
       - name: Environment 
         # macOS 11 was the first version to support ARM
