@@ -14,7 +14,7 @@ impl Plugin for AssetsManagerPlugin {
                     .load_collection::<World>()
                     .load_collection::<IconsAssets>()
                     .load_collection::<FontAssets>()
-                    .load_collection::<HostileEntityAssets>(),
+                    .load_collection::<EntitySpriteAssets>(),
             )
             .add_systems(
                 OnTransition {
@@ -41,7 +41,8 @@ pub struct World {
 }
 
 #[derive(AssetCollection, Resource, Clone)]
-pub struct HostileEntityAssets {
+pub struct EntitySpriteAssets {
+    // Hostile Entity
     #[asset(texture_atlas_layout(
         tile_size_x = 16,
         tile_size_y = 16,
@@ -59,6 +60,23 @@ pub struct HostileEntityAssets {
     pub grave_revenant: Handle<Image>,
     #[asset(path = "hostile/Mutilated Stumbler/MutilatedStumbler.png")]
     pub mutilated_stumbler: Handle<Image>,
+
+    // Player
+    #[asset(texture_atlas_layout(
+        tile_size_x = 16,
+        tile_size_y = 16,
+        columns = 24,
+        rows = 1,
+        padding_x = 0,
+        padding_y = 0,
+        offset_x = 0,
+        offset_y = 0
+    ))]
+    pub player_layout: Handle<TextureAtlasLayout>,
+    #[asset(path = "character/running.png")]
+    pub player_running: Handle<Image>,
+    #[asset(path = "character/idle.png")]
+    pub player_idle: Handle<Image>,
 }
 
 #[derive(AssetCollection, Resource, Clone)]

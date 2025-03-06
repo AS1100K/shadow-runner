@@ -1,5 +1,5 @@
 use crate::{
-    assets::{AssetsLoadingState, IconsAssets},
+    assets::{AssetsLoadingState, EntitySpriteAssets, IconsAssets},
     colliders::ColliderBundle,
     ground_detection::{GroundDetection, GroundDetectionPlugin},
     level_manager::CurrentLevelInfo,
@@ -29,7 +29,8 @@ impl Plugin for PlayerPlugin {
             )
             .add_systems(
                 Update,
-                sync_healthbar.run_if(in_state(GameState::PlayingScreen)),
+                (sync_healthbar, handle_player_animation)
+                    .run_if(in_state(GameState::PlayingScreen)),
             )
             .add_systems(
                 FixedUpdate,
@@ -60,14 +61,11 @@ pub struct Player {
 #[derive(Default, Component)]
 pub struct PlayerEntity;
 
-#[derive(Default, Component)]
+#[derive(Default, Component, PartialEq, Eq)]
 pub enum PlayerState {
     #[default]
     Idle,
-    Moving,
-    Falling,
-    Dead,
-    Hurt,
+    Running,
 }
 
 #[derive(better_default::Default, Component)]
@@ -79,9 +77,9 @@ pub struct HealthBar {
 // TODO: Add auto-snip to the diagonal tiles
 fn player_movement(
     input: Res<ButtonInput<KeyCode>>,
-    mut query: Query<(&mut Velocity, &GroundDetection, &mut Sprite), With<PlayerEntity>>,
+    mut query: Query<(&mut Velocity, &mut Sprite, &GroundDetection), With<PlayerEntity>>,
 ) {
-    for (mut velocity, ground_detection, mut player_sprite) in &mut query {
+    for (mut velocity, mut player_sprite, ground_detection) in &mut query {
         let right = if input.pressed(KeyCode::KeyD) {
             player_sprite.flip_x = false;
             1.
@@ -99,6 +97,31 @@ fn player_movement(
 
         if input.just_pressed(KeyCode::Space) && ground_detection.on_ground {
             velocity.linvel.y = 400.;
+        }
+    }
+}
+
+#[allow(clippy::type_complexity)]
+fn handle_player_animation(
+    mut query: Query<
+        (&mut Sprite, &mut PlayerState, &Velocity),
+        (With<PlayerEntity>, Changed<Velocity>),
+    >,
+    entity_sprite_assets: Res<EntitySpriteAssets>,
+) {
+    for (mut sprite, mut player_state, player_velocity) in &mut query {
+        if player_velocity.linvel.x == 0. && (-1.0..=1.0).contains(&player_velocity.linvel.y) {
+            // Idle State
+            if PlayerState::Idle != *player_state {
+                *player_state = PlayerState::Idle;
+                sprite.image = entity_sprite_assets.player_idle.clone();
+            }
+        } else {
+            // Running State
+            if PlayerState::Running != *player_state {
+                *player_state = PlayerState::Running;
+                sprite.image = entity_sprite_assets.player_running.clone();
+            }
         }
     }
 }

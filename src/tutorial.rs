@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use crate::{
-    assets::{FontAssets, HostileEntityAssets, IconsAssets},
+    assets::{EntitySpriteAssets, FontAssets, IconsAssets},
     level_manager::CurrentLevelInfo,
     screens::despawn_screen,
     sprite_animation::Animation,
@@ -309,7 +309,7 @@ fn update_tutorial_context(
 fn update_level_specific_context(
     current_level_info: Res<CurrentLevelInfo>,
     font_assets: Res<FontAssets>,
-    hostile_assets: Res<HostileEntityAssets>,
+    entity_sprite_assets: Res<EntitySpriteAssets>,
     icons_assets: Res<IconsAssets>,
     mut commands: Commands,
 ) {
@@ -372,9 +372,9 @@ fn update_level_specific_context(
                                     })
                                     .with_child((
                                         ImageNode {
-                                            image: hostile_assets.sand_ghoul.clone(),
+                                            image: entity_sprite_assets.sand_ghoul.clone(),
                                             texture_atlas: Some(
-                                                hostile_assets.layout.clone().into(),
+                                                entity_sprite_assets.layout.clone().into(),
                                             ),
                                             ..default()
                                         },
@@ -422,9 +422,9 @@ fn update_level_specific_context(
                                     })
                                     .with_child((
                                         ImageNode {
-                                            image: hostile_assets.grave_revenant.clone(),
+                                            image: entity_sprite_assets.grave_revenant.clone(),
                                             texture_atlas: Some(
-                                                hostile_assets.layout.clone().into(),
+                                                entity_sprite_assets.layout.clone().into(),
                                             ),
                                             ..default()
                                         },
@@ -472,9 +472,9 @@ fn update_level_specific_context(
                                     })
                                     .with_child((
                                         ImageNode {
-                                            image: hostile_assets.mutilated_stumbler.clone(),
+                                            image: entity_sprite_assets.mutilated_stumbler.clone(),
                                             texture_atlas: Some(
-                                                hostile_assets.layout.clone().into(),
+                                                entity_sprite_assets.layout.clone().into(),
                                             ),
                                             ..default()
                                         },
