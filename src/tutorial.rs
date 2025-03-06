@@ -310,6 +310,7 @@ fn update_level_specific_context(
     current_level_info: Res<CurrentLevelInfo>,
     font_assets: Res<FontAssets>,
     hostile_assets: Res<HostileEntityAssets>,
+    icons_assets: Res<IconsAssets>,
     mut commands: Commands,
 ) {
     if current_level_info.is_changed() {
@@ -501,6 +502,126 @@ fn update_level_specific_context(
                                             ..default()
                                         },
                                     ));
+                            });
+                    });
+            }
+            3 => {
+                commands
+                    .spawn((
+                        AutoDespawn::default(),
+                        Node {
+                            top: Val::Px(10.),
+                            left: Val::Px(10.),
+                            position_type: PositionType::Absolute,
+                            ..default()
+                        },
+                    ))
+                    .with_child((
+                        Text::new("New Chapter: Dungeons\nDungeons are heavily guarded"),
+                        TextColor::WHITE,
+                        TextFont {
+                            font: font_assets.default_font.clone(),
+                            font_size: 33.,
+                            ..default()
+                        },
+                    ));
+
+                // Spawn New Entities Information
+                commands
+                    .spawn((
+                        AutoDespawn::new(Duration::from_secs(30)),
+                        Node {
+                            right: Val::Px(10.),
+                            bottom: Val::Px(10.),
+                            position_type: PositionType::Absolute,
+                            display: Display::Flex,
+                            flex_direction: FlexDirection::Column,
+                            justify_content: JustifyContent::Center,
+                            align_items: AlignItems::FlexStart,
+                            row_gap: Val::Px(50.),
+                            ..default()
+                        },
+                    ))
+                    .with_children(|parent| {
+                        // Spawn Jump Booster Info
+                        parent
+                            .spawn(Node {
+                                display: Display::Flex,
+                                justify_content: JustifyContent::Center,
+                                align_items: AlignItems::Center,
+                                column_gap: Val::Px(50.),
+                                ..default()
+                            })
+                            .with_children(|parent| {
+                                // Spawn Jump Booster Sprite
+                                parent
+                                    .spawn(Node {
+                                        width: Val::Px(75.),
+                                        height: Val::Px(75.),
+                                        ..default()
+                                    })
+                                    .with_child(ImageNode {
+                                        image: icons_assets.jump_booster_icon.clone(),
+                                        ..default()
+                                    });
+
+                                // Spawn Info
+                                parent.spawn((
+                                    Text::new("Jump Booster: Boosts you\nup in the air."),
+                                    TextColor::WHITE,
+                                    TextFont {
+                                        font: font_assets.default_font.clone(),
+                                        font_size: 33.,
+                                        ..default()
+                                    },
+                                ));
+                            });
+
+                        // Spawn Spike Info
+                        parent
+                            .spawn(Node {
+                                display: Display::Flex,
+                                justify_content: JustifyContent::Center,
+                                align_items: AlignItems::Center,
+                                column_gap: Val::Px(50.),
+                                ..default()
+                            })
+                            .with_children(|parent| {
+                                // Spawn Jump Booster Sprite
+                                parent
+                                    .spawn(Node {
+                                        width: Val::Px(75.),
+                                        height: Val::Px(75.),
+                                        ..default()
+                                    })
+                                    .with_child((
+                                        ImageNode {
+                                            image: icons_assets.spike.clone(),
+                                            texture_atlas: Some(
+                                                icons_assets.spike_layout.clone().into(),
+                                            ),
+                                            ..default()
+                                        },
+                                        Animation::new_image_node(
+                                            0,
+                                            5,
+                                            Timer::new(
+                                                Duration::from_secs_f32(0.25),
+                                                TimerMode::Repeating,
+                                            ),
+                                        ),
+                                    ));
+
+                                // Spawn Info
+                                parent.spawn((
+                                    Text::new("Spike: Deals 1 Heart\nDamage every second"),
+                                    TextColor::WHITE,
+                                    TextFont {
+                                        font: font_assets.default_font.clone(),
+                                        font_size: 33.,
+                                        ..default()
+                                    },
+                                ));
                             });
                     });
             }

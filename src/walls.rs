@@ -4,8 +4,13 @@ use bevy_ecs_tilemap::{map::TilemapId, tiles::TileBundle};
 use bevy_rapier2d::prelude::*;
 
 use crate::{
-    assets::AssetsLoadingState, level_manager::CurrentLevelInfo, player::PlayerEntity,
-    time::RecordTimeEvent, GameState,
+    assets::AssetsLoadingState,
+    hostile_entity::{DamageCount, HostileEntity},
+    level_manager::CurrentLevelInfo,
+    player::PlayerEntity,
+    special_tiles::SpikeEntity,
+    time::RecordTimeEvent,
+    GameState,
 };
 
 pub struct WallPlugin;
@@ -18,9 +23,9 @@ impl Plugin for WallPlugin {
                 .chain()
                 .run_if(in_state(AssetsLoadingState::Loaded)),
         )
-        .register_ldtk_int_cell::<Wall<WallEntity>>(1)
-        .register_ldtk_int_cell::<Wall<OutOfWorldEntity>>(2)
-        .register_ldtk_int_cell::<Wall<NextLevelEntity>>(3);
+        .register_ldtk_int_cell_for_layer::<Wall<WallEntity>>("Collider", 1)
+        .register_ldtk_int_cell_for_layer::<Wall<OutOfWorldEntity>>("Collider", 2)
+        .register_ldtk_int_cell_for_layer::<Wall<NextLevelEntity>>("Collider", 3);
     }
 }
 
@@ -63,6 +68,7 @@ pub fn spawn_wall_collisions(
             &Parent,
             Option<&OutOfWorldEntity>,
             Option<&NextLevelEntity>,
+            Option<&SpikeEntity>,
         ),
         Added<GlobalWallEntity>,
     >,
@@ -78,6 +84,10 @@ pub fn spawn_wall_collisions(
         left: i32,
         right: i32,
         /// Represents the ID of the IntCell
+        /// 1 => Normal Wall with collider
+        /// 2 => Game Over Wall collider
+        /// 3 => Next Level Trigger Wall Collider
+        /// 99 => Spike
         origin: i32,
     }
 
@@ -99,25 +109,25 @@ pub fn spawn_wall_collisions(
     // 2. it lets us easily add the collision entities as children of the appropriate level entity
     let mut level_to_wall_locations: HashMap<Entity, HashMap<GridCoords, i32>> = HashMap::new();
 
-    wall_query
-        .iter()
-        .for_each(|(&grid_coords, parent, out_of_world, next_level_entity)| {
+    wall_query.iter().for_each(
+        |(&grid_coords, parent, out_of_world, next_level_entity, spike_entity)| {
             // An intgrid tile's direct parent will be a layer entity, not the level entity
             // To get the level entity, you need the tile's grandparent.
             // This is where parent_query comes in.
             if let Ok(grandparent) = parent_query.get(parent.get()) {
-                let int_cell_id = match (out_of_world, next_level_entity) {
-                    (Some(_), None) => 2,
-                    (None, Some(_)) => 3,
-                    (None, None) => 1,
-                    _ => 3,
+                let int_cell_id = match (out_of_world, next_level_entity, spike_entity) {
+                    (Some(_), None, None) => 2,
+                    (None, Some(_), None) => 3,
+                    (None, None, Some(_)) => 99,
+                    _ => 1,
                 };
                 level_to_wall_locations
                     .entry(grandparent.get())
                     .or_default()
                     .insert(grid_coords, int_cell_id);
             }
-        });
+        },
+    );
 
     if !wall_query.is_empty() {
         level_query.iter().for_each(|(level_entity, level_iid)| {
@@ -239,7 +249,8 @@ pub fn spawn_wall_collisions(
                             ))
                             .insert(GlobalTransform::default());
 
-                        if wall_rect.origin == 2 || wall_rect.origin == 3 {
+                        if wall_rect.origin == 2 || wall_rect.origin == 3 || wall_rect.origin == 99
+                        {
                             info!("Subscribing to collision for {} Wall", wall_rect.origin);
                             entity.insert(ActiveEvents::COLLISION_EVENTS);
                         }
@@ -251,6 +262,10 @@ pub fn spawn_wall_collisions(
                         if wall_rect.origin == 3 {
                             entity.insert(NextLevelTrigger);
                         }
+
+                        if wall_rect.origin == 99 {
+                            entity.insert(HostileEntity).insert(DamageCount(1));
+                        }
                     }
                 });
             }
@@ -260,8 +275,16 @@ pub fn spawn_wall_collisions(
 
 // This component is essential as these tiles are just used for reference
 // and should not be rendered in the game
+#[allow(clippy::type_complexity)]
 fn despawn_tile_bundle(
-    query: Query<Entity, (Added<GlobalWallEntity>, With<TilemapId>)>,
+    query: Query<
+        Entity,
+        (
+            Added<GlobalWallEntity>,
+            With<TilemapId>,
+            Without<SpikeEntity>,
+        ),
+    >,
     mut commands: Commands,
 ) {
     for entity in &query {

@@ -6,6 +6,7 @@ use hostile_entity::HostilePlugin;
 use level_manager::LevelManager;
 use player::PlayerPlugin;
 use screens::ScreensPlugin;
+use special_tiles::SpecialTilesPlugin;
 use sprite_animation::SpriteAnimationPlugin;
 use time::TimeTakenPlugin;
 use tutorial::GameTutorialPlugin;
@@ -20,6 +21,7 @@ pub mod level_manager;
 pub mod physics;
 pub mod player;
 pub mod screens;
+pub mod special_tiles;
 pub mod sprite_animation;
 pub mod time;
 pub mod tutorial;
@@ -35,6 +37,7 @@ impl Plugin for EntitySpawnerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(assets::AssetsLoadingState::Loaded), spawn_basic)
             .add_plugins(WallPlugin)
+            .add_plugins(SpecialTilesPlugin)
             .add_plugins(PlayerPlugin)
             .add_plugins(HostilePlugin)
             .add_plugins(SpriteAnimationPlugin);
@@ -43,7 +46,6 @@ impl Plugin for EntitySpawnerPlugin {
 
 fn spawn_basic(mut commands: Commands, world: Res<assets::World>) {
     log::info!("Loading LDTK Bundle");
-    // Spawn LDTK Bundle
     commands.spawn(LdtkWorldBundle {
         ldtk_handle: world.ldtk.clone().into(),
         ..default()

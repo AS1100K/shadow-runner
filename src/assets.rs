@@ -63,6 +63,21 @@ pub struct HostileEntityAssets {
 
 #[derive(AssetCollection, Resource, Clone)]
 pub struct IconsAssets {
+    #[asset(path = "Legacy_Adventure_Pack/jump_booster.png")]
+    pub jump_booster_icon: Handle<Image>,
+    #[asset(path = "Legacy_Adventure_Pack/spike.png")]
+    pub spike: Handle<Image>,
+    #[asset(texture_atlas_layout(
+        tile_size_x = 16,
+        tile_size_y = 16,
+        columns = 6,
+        rows = 1,
+        padding_x = 0,
+        padding_y = 0,
+        offset_x = 0,
+        offset_y = 0
+    ))]
+    pub spike_layout: Handle<TextureAtlasLayout>,
     #[asset(path = "icons/icon_reset.png")]
     pub reset_icon: Handle<Image>,
     #[asset(path = "icons/icon_heart.png")]

@@ -25,7 +25,7 @@ pub fn spawn_ground_sensor(
                 y: half_extents_y,
             } = cuboid.half_extents();
 
-            let detector_shape = Collider::cuboid(half_extents_x, 2.);
+            let detector_shape = Collider::cuboid(half_extents_x * 0.5, 2.);
 
             let sensor_translation = Vec3::new(0., -half_extents_y, 0.);
 
