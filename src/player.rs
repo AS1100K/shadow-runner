@@ -1,5 +1,5 @@
 use crate::{
-    assets::{AssetsLoadingState, EntitySpriteAssets, IconsAssets},
+    assets::{AssetsLoadingState, AudioAssets, EntitySpriteAssets, IconsAssets},
     camera::MainCamera,
     colliders::ColliderBundle,
     ground_detection::{GroundDetection, GroundDetectionPlugin},
@@ -206,9 +206,27 @@ fn sync_healthbar(
     }
 }
 
-fn continue_taking_damage(mut query: Query<(&mut HealthBar, &ContinueTakingDamage)>) {
-    for (mut health_bar, damage_count) in &mut query {
+fn continue_taking_damage(
+    mut query: Query<
+        (
+            Entity,
+            &mut HealthBar,
+            &ContinueTakingDamage,
+            Option<&AudioPlayer>,
+        ),
+        With<PlayerEntity>,
+    >,
+    mut commands: Commands,
+    audio_assets: Res<AudioAssets>,
+) {
+    for (entity, mut health_bar, damage_count, audio_player) in &mut query {
         if health_bar.health > damage_count.0 {
+            if audio_player.is_none() {
+                commands.entity(entity).insert((
+                    AudioPlayer(audio_assets.damage.clone()),
+                    PlaybackSettings::REMOVE,
+                ));
+            }
             health_bar.health -= 1;
         } else {
             health_bar.health = 0;
@@ -220,15 +238,22 @@ fn add_blindness(
     main_camera_query: Query<Entity, With<MainCamera>>,
     player_query: Query<Entity, (With<PlayerEntity>, Added<Blinded>)>,
     mut commands: Commands,
+    audio_assets: Res<AudioAssets>,
 ) {
     for player in &player_query {
         log::info!("Adding Blindness");
-        commands.entity(player).insert(PointLight2d {
-            radius: GRID_SIZE as f32 * 4.,
-            color: Color::Srgba(YELLOW),
-            intensity: 0.8,
-            ..default()
-        });
+        commands
+            .entity(player)
+            .insert(PointLight2d {
+                radius: GRID_SIZE as f32 * 4.,
+                color: Color::Srgba(YELLOW),
+                intensity: 0.8,
+                ..default()
+            })
+            .insert((
+                AudioPlayer(audio_assets.i_can_feel_it_coming.clone()),
+                PlaybackSettings::REMOVE,
+            ));
 
         for main_camera in &main_camera_query {
             commands.entity(main_camera).insert(AmbientLight2d {

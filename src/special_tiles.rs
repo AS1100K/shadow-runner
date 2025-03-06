@@ -1,6 +1,6 @@
 use crate::{
-    colliders::ColliderBundle, hostile_entity::DamageCount, player::PlayerEntity,
-    sprite_animation::Animation, walls::GlobalWallEntity, GameState,
+    assets::AudioAssets, colliders::ColliderBundle, hostile_entity::DamageCount,
+    player::PlayerEntity, sprite_animation::Animation, walls::GlobalWallEntity, GameState,
 };
 use bevy::prelude::*;
 use bevy_ecs_ldtk::{app::LdtkIntCellAppExt, LdtkIntCell};
@@ -57,22 +57,31 @@ pub struct SpikeEntity;
 fn jump_booster_collision_event(
     mut collision_events: EventReader<CollisionEvent>,
     mut player_query: Query<(Entity, &mut Velocity), With<PlayerEntity>>,
-    jump_booster_query: Query<(Entity, &JumpBoosterEntity)>,
+    jump_booster_query: Query<(Entity, &JumpBoosterEntity, Option<&AudioPlayer>)>,
+    audio_assets: Res<AudioAssets>,
+    mut commands: Commands,
 ) {
     for collision in collision_events.read() {
         if let CollisionEvent::Started(entity_one, entity_two, ..) = *collision {
             let (player_entity, mut player_velocty) = player_query.single_mut();
 
             if entity_one == player_entity || entity_two == player_entity {
-                for (jump_booster_entity, jump_booster) in &jump_booster_query {
+                for (jump_booster_entity, jump_booster, audio_player) in &jump_booster_query {
                     if entity_two == jump_booster_entity || entity_one == jump_booster_entity {
                         let mut new_velocity = jump_booster.boost_velocty - player_velocty.linvel.y;
 
                         if new_velocity > jump_booster.boost_cap {
                             new_velocity = jump_booster.boost_cap;
                         }
-
                         player_velocty.linvel.y = new_velocity;
+
+                        if audio_player.is_none() {
+                            commands.entity(jump_booster_entity).insert((
+                                AudioPlayer(audio_assets.jump_boost.clone()),
+                                PlaybackSettings::REMOVE,
+                            ));
+                        }
+
                         return;
                     }
                 }

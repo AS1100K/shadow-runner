@@ -1,4 +1,5 @@
 use crate::{
+    assets::AudioAssets,
     colliders::ColliderBundle,
     player::{Blinded, ContinueTakingDamage, HealthBar, PlayerEntity},
     sprite_animation::Animation,
@@ -163,12 +164,13 @@ pub fn patrol(mut query: Query<(&mut Transform, &mut Velocity, &mut Patrol, &mut
 
 fn damage_player(
     mut collision_events: EventReader<CollisionEvent>,
-    mut player_query: Query<(Entity, &mut HealthBar), With<PlayerEntity>>,
+    mut player_query: Query<(Entity, &mut HealthBar, Option<&AudioPlayer>), With<PlayerEntity>>,
     hostile_query: Query<(Entity, &DamageCount), With<HostileEntity>>,
     mut commands: Commands,
+    audio_assets: Res<AudioAssets>,
 ) {
     for collision in collision_events.read() {
-        let (player_entity, mut player_healtbar) = player_query.single_mut();
+        let (player_entity, mut player_healtbar, audio_player) = player_query.single_mut();
         match *collision {
             CollisionEvent::Started(entity_one, entity_two, ..) => {
                 if entity_one == player_entity || entity_two == player_entity {
@@ -178,9 +180,16 @@ fn damage_player(
 
                             if player_healtbar.health > damage_count.0 {
                                 player_healtbar.health -= damage_count.0;
-                                commands
-                                    .entity(player_entity)
-                                    .insert(ContinueTakingDamage(damage_count.0));
+
+                                let mut entity_commands = commands.entity(player_entity);
+                                entity_commands.insert(ContinueTakingDamage(damage_count.0));
+
+                                if audio_player.is_none() {
+                                    entity_commands.insert((
+                                        AudioPlayer(audio_assets.damage.clone()),
+                                        PlaybackSettings::REMOVE,
+                                    ));
+                                }
                             } else {
                                 player_healtbar.health = 0;
                             }

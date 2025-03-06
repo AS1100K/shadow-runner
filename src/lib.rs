@@ -70,7 +70,11 @@ impl Plugin for BasePlugin {
                 Update,
                 base_game_system.run_if(in_state(assets::AssetsLoadingState::Loaded)),
             )
-            .add_systems(Update, auto_despawn_system);
+            .add_systems(Update, auto_despawn_system)
+            .add_systems(
+                OnEnter(assets::AssetsLoadingState::Loaded),
+                play_game_background_music,
+            );
     }
 }
 
@@ -145,4 +149,11 @@ pub fn auto_despawn_system(mut commands: Commands, query: Query<(Entity, &AutoDe
             }
         }
     }
+}
+
+fn play_game_background_music(mut commands: Commands, audio_assets: Res<assets::AudioAssets>) {
+    commands.spawn((
+        AudioPlayer(audio_assets.smooth_lovin.clone()),
+        PlaybackSettings::LOOP,
+    ));
 }

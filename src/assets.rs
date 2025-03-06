@@ -14,6 +14,7 @@ impl Plugin for AssetsManagerPlugin {
                     .load_collection::<World>()
                     .load_collection::<IconsAssets>()
                     .load_collection::<FontAssets>()
+                    .load_collection::<AudioAssets>()
                     .load_collection::<EntitySpriteAssets>(),
             )
             .add_systems(
@@ -122,6 +123,20 @@ pub struct IconsAssets {
 pub struct FontAssets {
     #[asset(path = "fonts/RasterForge.ttf")]
     pub default_font: Handle<Font>,
+}
+
+#[derive(AssetCollection, Resource, Clone)]
+pub struct AudioAssets {
+    #[asset(path = "audio/Smooth Lovin.ogg")]
+    pub smooth_lovin: Handle<AudioSource>,
+    #[asset(path = "audio/I can Feel it Coming.ogg")]
+    pub i_can_feel_it_coming: Handle<AudioSource>,
+    #[asset(path = "audio/damage.ogg")]
+    pub damage: Handle<AudioSource>,
+    #[asset(path = "audio/button.ogg")]
+    pub button: Handle<AudioSource>,
+    #[asset(path = "audio/jump_boost.ogg")]
+    pub jump_boost: Handle<AudioSource>,
 }
 
 fn update_game_state(mut next_game_state: ResMut<NextState<GameState>>) {
