@@ -1,5 +1,5 @@
 use crate::{
-    assets::{AssetsLoadingState, AudioAssets, EntitySpriteAssets, IconsAssets},
+    assets::{AudioAssets, EntitySpriteAssets, IconsAssets},
     camera::MainCamera,
     colliders::ColliderBundle,
     ground_detection::{GroundDetection, GroundDetectionPlugin},
@@ -20,10 +20,6 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.register_ldtk_entity::<Player>("Player")
             .add_plugins(GroundDetectionPlugin)
-            .add_systems(
-                Update,
-                player_movement.run_if(in_state(AssetsLoadingState::Loaded)),
-            )
             .add_systems(OnEnter(GameState::PlayingScreen), spawn_healthbar)
             .add_systems(
                 OnExit(GameState::PlayingScreen),
@@ -32,6 +28,7 @@ impl Plugin for PlayerPlugin {
             .add_systems(
                 Update,
                 (
+                    player_movement,
                     sync_healthbar,
                     handle_player_animation,
                     add_blindness,
@@ -42,6 +39,20 @@ impl Plugin for PlayerPlugin {
             .add_systems(
                 FixedUpdate,
                 continue_taking_damage.run_if(in_state(GameState::PlayingScreen)),
+            )
+            .add_systems(
+                OnTransition {
+                    exited: GameState::PlayingScreen,
+                    entered: GameState::CreditScreen,
+                },
+                despawn_blindness,
+            )
+            .add_systems(
+                OnTransition {
+                    exited: GameState::PlayingScreen,
+                    entered: GameState::MainMenuScreen,
+                },
+                despawn_blindness,
             );
     }
 }
@@ -286,6 +297,28 @@ fn update_blindness(
             for main_camera in &main_camera_query {
                 commands.entity(main_camera).remove::<AmbientLight2d>();
             }
+        }
+    }
+}
+
+// Similar to update_blindness system
+fn despawn_blindness(
+    player_query: Query<Entity, With<PlayerEntity>>,
+    main_camera_query: Query<Entity, With<MainCamera>>,
+    mut commands: Commands,
+) {
+    for player in &player_query {
+        log::info!("Removing Blindness");
+        commands
+            .entity(player)
+            .remove::<Blinded>()
+            .insert(PointLight2d {
+                intensity: 1.,
+                ..default()
+            });
+
+        for main_camera in &main_camera_query {
+            commands.entity(main_camera).remove::<AmbientLight2d>();
         }
     }
 }

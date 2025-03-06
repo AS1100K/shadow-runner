@@ -1,4 +1,4 @@
-use super::despawn_screen;
+use super::{despawn_screen, MainMenuButton};
 use crate::{
     assets::*,
     camera::MainCamera,
@@ -92,6 +92,8 @@ fn spawn_screen(
                 .spawn(Node {
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
+                    flex_direction: FlexDirection::Column,
+                    row_gap: Val::Px(50.),
                     ..default()
                 })
                 .with_children(|parent| {
@@ -133,6 +135,32 @@ fn spawn_screen(
                                 },
                             ));
                         });
+
+                    // Spawn Main Menu Button
+                    parent
+                        .spawn((
+                            MainMenuButton,
+                            Button,
+                            Node {
+                                width: Val::Px(300.),
+                                height: Val::Px(100.),
+                                align_items: AlignItems::Center,
+                                justify_content: JustifyContent::Center,
+                                column_gap: Val::Px(25.),
+                                ..default()
+                            },
+                            BackgroundColor(Color::hsl(31., 0.72, 0.46)),
+                        ))
+                        .with_child((
+                            Text::new("Main Menu"),
+                            // hsl(0, 0%, 88%)
+                            TextColor(Color::hsl(0., 0., 0.88)),
+                            TextFont {
+                                font: font.clone(),
+                                font_size: 33.,
+                                ..default()
+                            },
+                        ));
                 });
         });
 }

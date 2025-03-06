@@ -38,7 +38,8 @@ impl Plugin for GameTutorialPlugin {
             .add_systems(
                 Update,
                 update_level_specific_context.run_if(in_state(GameState::PlayingScreen)),
-            );
+            )
+            .add_systems(Update, auto_remove_tutorial);
     }
 }
 
@@ -58,8 +59,12 @@ pub struct TutorialInfo {
 #[derive(Component)]
 pub struct TutorialText;
 
+// This component is only used for first level tutorial
 #[derive(Component)]
 pub struct TutorialParent;
+
+#[derive(Component)]
+pub struct TutorialLevelSpecific(pub i32);
 
 fn set_tutorial_state(
     level: Res<CurrentLevelInfo>,
@@ -324,6 +329,7 @@ fn update_level_specific_context(
                             position_type: PositionType::Absolute,
                             ..default()
                         },
+                        TutorialLevelSpecific(1),
                     ))
                     .with_child((
                         Text::new(
@@ -351,6 +357,7 @@ fn update_level_specific_context(
                             row_gap: Val::Px(20.),
                             ..default()
                         },
+                        TutorialLevelSpecific(2),
                     ))
                     .with_children(|parent| {
                         // Sand Ghoul
@@ -514,6 +521,7 @@ fn update_level_specific_context(
                             position_type: PositionType::Absolute,
                             ..default()
                         },
+                        TutorialLevelSpecific(3),
                     ))
                     .with_child((
                         Text::new("New Chapter: Dungeons\nDungeons are heavily guarded"),
@@ -540,6 +548,7 @@ fn update_level_specific_context(
                             row_gap: Val::Px(50.),
                             ..default()
                         },
+                        TutorialLevelSpecific(3),
                     ))
                     .with_children(|parent| {
                         // Spawn Jump Booster Info
@@ -635,6 +644,7 @@ fn update_level_specific_context(
                             column_gap: Val::Px(20.),
                             ..default()
                         },
+                        TutorialLevelSpecific(4),
                     ))
                     .with_children(|parent| {
                         // Spawn Image
@@ -663,6 +673,20 @@ fn update_level_specific_context(
                     });
             }
             _ => {}
+        }
+    }
+}
+
+fn auto_remove_tutorial(
+    current_level_info: Res<CurrentLevelInfo>,
+    query: Query<(Entity, &TutorialLevelSpecific)>,
+    mut commands: Commands,
+) {
+    if current_level_info.is_changed() {
+        for (entity, tutorial) in &query {
+            if tutorial.0 != current_level_info.current_level_id {
+                commands.entity(entity).despawn_recursive();
+            }
         }
     }
 }

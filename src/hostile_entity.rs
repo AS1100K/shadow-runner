@@ -228,7 +228,7 @@ fn blinding_power(
                 .translation
                 .truncate()
                 .distance(blinding_power_transform.translation.truncate())
-                <= (GRID_SIZE as f32 * 5.)
+                <= (GRID_SIZE as f32 * 10.)
             {
                 log::info!("Detected Player, Effecting with Blindness");
                 commands

@@ -22,17 +22,11 @@ Run `./run.sh` for more info
         - [ ] Design _Partially Completed_
     - [x] Loading Screen _BUG: Not Rendering_
     - [ ] Settings Screen
-- [ ] Level Design (Parkour, etc.)
+    - [x] Credit Screen
+- [x] Level Design (Parkour, etc.)
 - [ ] Score System
-- [ ] Player
-    - [ ] Time Slow Ability _+ Other Abilities_
-    - [ ] Speed Increase
-    - [x] Movement
-        - [x] Basic Movement _(like Up, Right and Left)_
-        - [x] Sync `X` Camera Movement
-- [ ] Shadow
-    - [ ] Mimic Player Moves
-    - [ ] Impact from Player Ability
+- [x] Player
+- [x] Hostile Entities
 - [ ] Characters & Theme
-- [ ] Animations
-- [ ] Music
+- [x] Animations
+- [x] Music

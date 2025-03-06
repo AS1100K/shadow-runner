@@ -1,4 +1,4 @@
-use super::despawn_screen;
+use super::{despawn_screen, MainMenuButton};
 use crate::{
     assets::FontAssets,
     level_manager::{AllLevels, CurrentLevelInfo},
@@ -32,6 +32,36 @@ pub struct LevelButton {
 
 fn spawn_screen(mut commands: Commands, all_levels: Res<AllLevels>, font_assets: Res<FontAssets>) {
     let font = &font_assets.default_font;
+
+    // Back Button
+    commands
+        .spawn((
+            OnLevelMenuScreen,
+            Node {
+                position_type: PositionType::Absolute,
+                top: Val::Px(10.),
+                left: Val::Px(10.),
+                display: Display::Flex,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                column_gap: Val::Px(20.),
+                padding: UiRect::axes(Val::Px(20.), Val::Px(10.)),
+                ..default()
+            },
+            BackgroundColor(Color::hsl(31., 0.72, 0.46)),
+            Button,
+            MainMenuButton,
+        ))
+        .with_child((
+            Text::new("Main Menu"),
+            TextColor::WHITE,
+            TextFont {
+                font: font_assets.default_font.clone(),
+                font_size: 20.,
+                ..default()
+            },
+        ));
+
     commands
         .spawn((
             OnLevelMenuScreen,

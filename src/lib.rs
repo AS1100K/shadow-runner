@@ -87,25 +87,20 @@ pub enum GameState {
     MainMenuScreen,
     LevelsMenuScreen,
     PlayingScreen,
+    CreditScreen,
 }
 
 fn base_game_system(
     keyboard: Res<ButtonInput<KeyCode>>,
-    mut time: ResMut<Time<Virtual>>,
     game_state: Res<State<GameState>>,
     mut next_game_state: ResMut<NextState<GameState>>,
-    mut time_taken_res: ResMut<time::TimeTakenRes>,
 ) {
     if keyboard.just_pressed(KeyCode::Escape) {
         match *game_state.get() {
             GameState::PauseScreen => {
-                time_taken_res.stopwatch.unpause();
-                time.unpause();
                 next_game_state.set(GameState::PlayingScreen);
             }
             GameState::PlayingScreen => {
-                time_taken_res.stopwatch.pause();
-                time.pause();
                 next_game_state.set(GameState::PauseScreen);
             }
             _ => {}
