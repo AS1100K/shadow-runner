@@ -9,7 +9,8 @@ use crate::{
     time::RecordTimeEvent,
     GameState, GRID_SIZE,
 };
-use bevy::{color::palettes::css::YELLOW, prelude::*};
+use bevy::utils::Duration;
+use bevy::{color::palettes::css::YELLOW, prelude::*, time::common_conditions::on_real_timer};
 use bevy_ecs_ldtk::prelude::*;
 use bevy_light_2d::prelude::{AmbientLight2d, PointLight2d};
 use bevy_rapier2d::prelude::Velocity;
@@ -31,10 +32,16 @@ impl Plugin for PlayerPlugin {
                     player_movement,
                     sync_healthbar,
                     handle_player_animation,
-                    add_blindness,
                     update_blindness,
                 )
                     .run_if(in_state(GameState::PlayingScreen)),
+            )
+            .add_systems(
+                Update,
+                add_blindness.run_if(
+                    in_state(GameState::PlayingScreen)
+                        .and(on_real_timer(Duration::from_secs_f32(0.5))),
+                ),
             )
             .add_systems(
                 FixedUpdate,

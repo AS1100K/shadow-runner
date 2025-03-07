@@ -9404,7 +9404,7 @@
 						},
 						{
 							"__identifier": "Sand_Ghoul",
-							"__grid": [11,34],
+							"__grid": [6,34],
 							"__pivot": [0.5,0.5],
 							"__tags": [],
 							"__tile": { "tilesetUid": 32, "x": 0, "y": 0, "w": 16, "h": 16 },
@@ -9413,10 +9413,10 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 31,
-							"px": [184,552],
-							"fieldInstances": [{ "__identifier": "patrol", "__type": "Array<Point>", "__value": [{ "cx": 6, "cy": 34 }], "__tile": null, "defUid": 34, "realEditorValues": [{
+							"px": [104,552],
+							"fieldInstances": [{ "__identifier": "patrol", "__type": "Array<Point>", "__value": [{ "cx": 11, "cy": 34 }], "__tile": null, "defUid": 34, "realEditorValues": [{
 								"id": "V_String",
-								"params": ["6,34"]
+								"params": ["11,34"]
 							}] }]
 						}
 					]

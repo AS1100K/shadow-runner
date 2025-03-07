@@ -15,21 +15,22 @@ platform=$1
 
 case "$platform" in
     "wsl")
+        clear
         echo "Running Windows build commands in WSL..."
         cargo build --features "debug" --target x86_64-pc-windows-gnu
         cp target/x86_64-pc-windows-gnu/debug/shadow-runner.exe .
-        clear
         exec ./shadow-runner.exe "$@"
         ;;
     "wasm")
+        clear
         echo "Running WASM build commands..."
-        clear && cargo run --features debug --target wasm32-unknown-unknown
+        cargo run --features debug --target wasm32-unknown-unknown
         ;;
     "lint")
         clear && cargo fmt && cargo clippy --workspace --all-targets --all-features -- -Dwarnings
         ;;
     "auto")
-        clear && cargo fmt && cargo clippy --workspace --all-targets --all-features -- -Dwarnings
+        clear && cargo run --features debug
         ;;
     *)
         echo "Error: Unknown command. Use wsl, wasm, lint or auto"

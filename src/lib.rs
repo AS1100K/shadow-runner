@@ -61,7 +61,7 @@ pub struct BasePlugin;
 impl Plugin for BasePlugin {
     fn build(&self, app: &mut App) {
         app.insert_state(GameState::default())
-            .insert_resource(Time::<Fixed>::from_seconds(0.5))
+            .insert_resource(Time::<Fixed>::from_seconds(1.))
             .add_plugins(AssetsManagerPlugin)
             .add_plugins(ScreensPlugin)
             .add_plugins(LevelManager)
