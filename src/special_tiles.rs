@@ -57,7 +57,7 @@ pub struct SpikeEntity;
 fn jump_booster_collision_event(
     mut collision_events: EventReader<CollisionEvent>,
     mut player_query: Query<(Entity, &mut Velocity), With<PlayerEntity>>,
-    jump_booster_query: Query<(Entity, &JumpBoosterEntity, Option<&AudioPlayer>)>,
+    jump_booster_query: Query<(Entity, &JumpBoosterEntity)>,
     audio_assets: Res<AudioAssets>,
     mut commands: Commands,
 ) {
@@ -66,7 +66,7 @@ fn jump_booster_collision_event(
             let (player_entity, mut player_velocty) = player_query.single_mut();
 
             if entity_one == player_entity || entity_two == player_entity {
-                for (jump_booster_entity, jump_booster, audio_player) in &jump_booster_query {
+                for (jump_booster_entity, jump_booster) in &jump_booster_query {
                     if entity_two == jump_booster_entity || entity_one == jump_booster_entity {
                         let mut new_velocity = jump_booster.boost_velocty - player_velocty.linvel.y;
 
@@ -75,12 +75,10 @@ fn jump_booster_collision_event(
                         }
                         player_velocty.linvel.y = new_velocity;
 
-                        if audio_player.is_none() {
-                            commands.entity(jump_booster_entity).insert((
-                                AudioPlayer(audio_assets.jump_boost.clone()),
-                                PlaybackSettings::REMOVE,
-                            ));
-                        }
+                        commands.spawn((
+                            AudioPlayer(audio_assets.jump_boost.clone()),
+                            PlaybackSettings::REMOVE,
+                        ));
 
                         return;
                     }
