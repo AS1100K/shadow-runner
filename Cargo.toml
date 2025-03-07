@@ -1,20 +1,29 @@
-[package]
-name = "shadow-runner"
-version = "0.1.0"
-edition = "2021"
+[workspace.package]
+authors = ["Aditya Kumar <git@adityais.dev>"]
+repository = "https://github.com/as1100k/shadow-runner"
 
-[features]
-debug = ["bevy_rapier2d/debug-render-2d"]
 
-[dependencies]
-bevy = { version = "0.15", features = ["webgpu"] }
+[workspace]
+members = [
+    "./shadow-runner",
+    "./playroomkit-bevy", 
+    "playroomkit-bindgen", 
+]
+resolver = "2"
+
+
+[workspace.dependencies]
+bevy = {version = "0.15", features = ["webgpu"] }
 bevy_rapier2d = "0.29"
 bevy_ecs_ldtk = "0.11"
 bevy_ecs_tilemap = "0.15"
 bevy_asset_loader = { version = "0.22", features = ["2d"] }
-bevy_light_2d = { version = "0.5" }
+bevy_light_2d = "0.5"
 better_default = "1"
 log = { version = "*", features = ["max_level_debug", "release_max_level_warn"] }
+# Internal Dependencies
+shadow_runner = { path = "./shadow-runner" }
+
 
 [profile.release]
 lto = true

@@ -1,0 +1,19 @@
+[package]
+name = "shadow-runner"
+version = "0.1.0"
+edition = "2021"
+authors.workspace = true
+repository.workspace = true
+
+[features]
+debug = ["bevy_rapier2d/debug-render-2d"]
+
+[dependencies]
+bevy = { workspace = true }
+bevy_rapier2d = { workspace = true }
+bevy_ecs_ldtk = { workspace = true }
+bevy_ecs_tilemap = { workspace = true }
+bevy_asset_loader = { workspace = true }
+bevy_light_2d = { workspace = true }
+better_default = { workspace = true }
+log = { workspace = true }
