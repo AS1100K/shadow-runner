@@ -125,7 +125,6 @@ fn spawn_screen(
                         GridTrack::px(100.),
                         GridTrack::px(100.),
                         GridTrack::px(100.),
-                        GridTrack::px(100.),
                     ],
                     grid_auto_rows: vec![
                         GridTrack::px(100.),

@@ -727,6 +727,52 @@ fn update_level_specific_context(
                         },
                     ));
             }
+            7 => {
+                commands
+                    .spawn((
+                        AutoDespawn::new_recursive_despawn(Duration::from_secs(30)),
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(10.),
+                            bottom: Val::Px(10.),
+                            ..default()
+                        },
+                        TutorialLevelSpecific(5),
+                    ))
+                    .with_child((
+                        Text::new(
+                            "I don't think the Hostiles\nliked when you escaped\nthe Dungeon",
+                        ),
+                        TextColor::WHITE,
+                        TextFont {
+                            font: font_assets.default_font.clone(),
+                            font_size: 33.,
+                            ..default()
+                        },
+                    ));
+            }
+            8 => {
+                commands
+                    .spawn((
+                        AutoDespawn::new_recursive_despawn(Duration::from_secs(30)),
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(10.),
+                            bottom: Val::Px(10.),
+                            ..default()
+                        },
+                        TutorialLevelSpecific(5),
+                    ))
+                    .with_child((
+                        Text::new("Seems Like Hostile's Came Prepared!"),
+                        TextColor::WHITE,
+                        TextFont {
+                            font: font_assets.default_font.clone(),
+                            font_size: 33.,
+                            ..default()
+                        },
+                    ));
+            }
             _ => {}
         }
     }

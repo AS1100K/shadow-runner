@@ -18,9 +18,10 @@ Run `./run.sh` for more info
     - [ ] Settings Screen
     - [x] Credit Screen
 - [x] Level Design (Parkour, etc.)
-- [ ] Score System
+- [ ] Display Best Time of Each level
+- [ ] MultiPlayer
 - [x] Player
 - [x] Hostile Entities
-- [ ] Characters & Theme
+- [x] Characters & Theme
 - [x] Animations
 - [x] Music

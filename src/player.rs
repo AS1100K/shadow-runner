@@ -250,14 +250,21 @@ fn add_blindness(
     player_query: Query<Entity, (With<PlayerEntity>, Added<Blinded>)>,
     mut commands: Commands,
     audio_assets: Res<AudioAssets>,
+    current_level_info: Res<CurrentLevelInfo>,
 ) {
     for player in &player_query {
         log::info!("Adding Blindness");
+        let light_color = if current_level_info.current_level_id >= 7 {
+            Color::WHITE
+        } else {
+            Color::Srgba(YELLOW)
+        };
+
         commands
             .entity(player)
             .insert(PointLight2d {
                 radius: GRID_SIZE as f32 * 4.,
-                color: Color::Srgba(YELLOW),
+                color: light_color,
                 intensity: 0.8,
                 ..default()
             })
