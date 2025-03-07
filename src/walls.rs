@@ -363,7 +363,7 @@ fn next_level_hint(
                 translation: Vec3 {
                     x: transform.translation.x,
                     y: transform.translation.y + 50.,
-                    z: 5.,
+                    z: 50.,
                 },
                 ..default()
             },
