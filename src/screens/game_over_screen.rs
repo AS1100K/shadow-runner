@@ -2,7 +2,7 @@ use super::{despawn_screen, MainMenuButton};
 use crate::{
     assets::*,
     camera::MainCamera,
-    time::{convert_time_to_text, RestartTimeEvent, TimeTakenRes},
+    time::{convert_time_to_text, spawn_best_time, RestartTimeEvent, TimeTakenRes},
     GameState,
 };
 use bevy::prelude::*;
@@ -13,7 +13,8 @@ pub struct GameOverPlugin;
 
 impl Plugin for GameOverPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::GameOverScreen), spawn_screen)
+        app.add_event::<RestartGameEvent>()
+            .add_systems(OnEnter(GameState::GameOverScreen), spawn_screen)
             .add_systems(
                 OnExit(GameState::GameOverScreen),
                 despawn_screen::<OnGameOverScreen>,
@@ -23,6 +24,10 @@ impl Plugin for GameOverPlugin {
                 restart_game.run_if(
                     in_state(GameState::GameOverScreen).or(in_state(GameState::PauseScreen)),
                 ),
+            )
+            .add_systems(
+                Update,
+                restart_game_event.run_if(in_state(AssetsLoadingState::Loaded)),
             );
     }
 }
@@ -165,13 +170,38 @@ fn spawn_screen(
                         ));
                 });
         });
+
+    // Spawn Best Time
+    spawn_best_time(
+        &mut commands,
+        time_taken_res,
+        font,
+        OnGameOverScreen,
+        16.,
+        16.,
+    );
 }
 
 #[allow(clippy::too_many_arguments)]
 fn restart_game(
     query: Query<&Interaction, (With<RestartGameButton>, Changed<Interaction>)>,
+    mut restart_game_event: EventWriter<RestartGameEvent>,
+) {
+    for interaction in &query {
+        if Interaction::Pressed == *interaction {
+            restart_game_event.send(RestartGameEvent);
+        }
+    }
+}
+
+#[derive(Event)]
+pub struct RestartGameEvent;
+
+#[allow(clippy::too_many_arguments)]
+fn restart_game_event(
+    mut events: EventReader<RestartGameEvent>,
     main_camera_query: Query<Entity, With<MainCamera>>,
-    level_selection: Res<LevelSelection>,
+    level_selection: Option<Res<LevelSelection>>,
     levels: Query<(Entity, &LevelIid)>,
     ldtk_projects: Query<&LdtkProjectHandle>,
     ldtk_project_assets: Res<Assets<LdtkProject>>,
@@ -180,47 +210,49 @@ fn restart_game(
     mut time: ResMut<Time<Virtual>>,
     mut restart_time_event: EventWriter<RestartTimeEvent>,
 ) {
-    for interaction in &query {
-        if Interaction::Pressed == *interaction {
-            let current_level = match level_selection.as_ref() {
-                LevelSelection::Iid(iid) => iid,
-                LevelSelection::Indices(indice) => {
-                    let ldtk_project = ldtk_project_assets
-                        .get(ldtk_projects.single())
-                        .expect("Project should be loaded if level has spawned");
+    for _ in events.read() {
+        let Some(level_selection) = level_selection.as_ref() else {
+            return;
+        };
 
-                    &match ldtk_project.get_raw_level_at_indices(indice) {
-                        Some(iid) => LevelIid::new(iid.iid.clone()),
-                        None => {
-                            log::error!("Level Indice: {:?} didn't exits", indice);
-                            return;
-                        }
+        let current_level = match level_selection.as_ref() {
+            LevelSelection::Iid(iid) => iid,
+            LevelSelection::Indices(indice) => {
+                let ldtk_project = ldtk_project_assets
+                    .get(ldtk_projects.single())
+                    .expect("Project should be loaded if level has spawned");
+
+                &match ldtk_project.get_raw_level_at_indices(indice) {
+                    Some(iid) => LevelIid::new(iid.iid.clone()),
+                    None => {
+                        log::error!("Level Indice: {:?} didn't exits", indice);
+                        return;
                     }
                 }
-                _ => {
-                    log::error!(
-                        "The Current level is not of Iid. LevelSelection: {:?}",
-                        level_selection
-                    );
-                    return;
-                }
-            };
-
-            for (level_entity, level_iid) in &levels {
-                if level_iid == current_level {
-                    restart_time_event.send(RestartTimeEvent);
-                    commands.entity(level_entity).insert(Respawn);
-                    next_game_state.set(GameState::PlayingScreen);
-                    time.unpause();
-
-                    let main_camera = main_camera_query.single();
-                    commands.entity(main_camera).remove::<AmbientLight2d>();
-
-                    return;
-                }
             }
+            _ => {
+                log::error!(
+                    "The Current level is not of Iid. LevelSelection: {:?}",
+                    level_selection
+                );
+                return;
+            }
+        };
 
-            log::error!("Failed to find level with iid {:?}", current_level);
+        for (level_entity, level_iid) in &levels {
+            if level_iid == current_level {
+                restart_time_event.send(RestartTimeEvent);
+                commands.entity(level_entity).insert(Respawn);
+                next_game_state.set(GameState::PlayingScreen);
+                time.unpause();
+
+                let main_camera = main_camera_query.single();
+                commands.entity(main_camera).remove::<AmbientLight2d>();
+
+                return;
+            }
         }
+
+        log::error!("Failed to find level with iid {:?}", current_level);
     }
 }

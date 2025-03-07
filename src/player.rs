@@ -155,20 +155,41 @@ pub struct HealthBarContext;
 #[require(HealthBar)]
 pub struct ContinueTakingDamage(pub u8);
 
-fn spawn_healthbar(mut commands: Commands) {
-    commands.spawn((
-        Node {
-            top: Val::Px(50.),
-            right: Val::Px(10.),
-            position_type: PositionType::Absolute,
-            display: Display::Flex,
-            justify_content: JustifyContent::FlexEnd,
-            align_items: AlignItems::Center,
-            column_gap: Val::Px(10.),
-            ..default()
-        },
-        HealthBarContext,
-    ));
+fn spawn_healthbar(
+    mut commands: Commands,
+    health_bar_query: Query<&HealthBar, With<PlayerEntity>>,
+    icons_assets: Res<IconsAssets>,
+) {
+    commands
+        .spawn((
+            Node {
+                top: Val::Px(50.),
+                right: Val::Px(10.),
+                position_type: PositionType::Absolute,
+                display: Display::Flex,
+                justify_content: JustifyContent::FlexEnd,
+                align_items: AlignItems::Center,
+                column_gap: Val::Px(10.),
+                ..default()
+            },
+            HealthBarContext,
+        ))
+        .with_children(|parent| {
+            for health_bar in &health_bar_query {
+                for _ in 0..health_bar.health {
+                    parent
+                        .spawn(Node {
+                            width: Val::Px(30.),
+                            height: Val::Px(30.),
+                            ..default()
+                        })
+                        .with_child(ImageNode {
+                            image: icons_assets.heart_icon.clone(),
+                            ..default()
+                        });
+                }
+            }
+        });
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -287,8 +308,26 @@ fn update_blindness(
     main_camera_query: Query<Entity, With<MainCamera>>,
     time: Res<Time<Virtual>>,
     mut commands: Commands,
+    current_level_info: Res<CurrentLevelInfo>,
 ) {
     for (player, mut blinded) in &mut player_query {
+        if current_level_info.is_changed() {
+            log::info!("Removing Blindness because level has changed");
+            commands
+                .entity(player)
+                .remove::<Blinded>()
+                .insert(PointLight2d {
+                    intensity: 1.,
+                    ..default()
+                });
+
+            for main_camera in &main_camera_query {
+                commands.entity(main_camera).remove::<AmbientLight2d>();
+            }
+
+            return;
+        }
+
         blinded.0.tick(time.delta());
 
         if blinded.0.finished() {

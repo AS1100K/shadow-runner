@@ -124,3 +124,59 @@ pub fn convert_time_to_text(duration: &Duration) -> String {
     let seconds = (time_elapsed % 60.0).floor() as u32;
     format!("{:02}:{:02}", minutes, seconds)
 }
+
+pub fn spawn_best_time(
+    commands: &mut Commands,
+    time_taken_res: Res<TimeTakenRes>,
+    font: &Handle<Font>,
+    screen_component: impl Component + 'static,
+    top: f32,
+    left: f32,
+) {
+    commands
+        .spawn((
+            screen_component,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(left),
+                top: Val::Px(top),
+                display: Display::Flex,
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(20.),
+                ..default()
+            },
+            ZIndex(2),
+        ))
+        .with_children(|parent| {
+            if !time_taken_res.all_times.is_empty() {
+                parent.spawn((
+                    Text::new("My Best Time"),
+                    TextColor(Color::hsl(327., 0.24, 0.16)),
+                    TextFont {
+                        font: font.clone(),
+                        font_size: 33.,
+                        ..default()
+                    },
+                ));
+
+                let mut sorted_times: Vec<_> = time_taken_res.all_times.iter().collect();
+                sorted_times.sort_by_key(|&(level_id, _)| level_id);
+
+                for (level_id, time) in sorted_times {
+                    parent.spawn((
+                        Text::new(format!(
+                            "Level {} - {}",
+                            level_id,
+                            convert_time_to_text(time)
+                        )),
+                        TextColor(Color::hsl(327., 0.24, 0.16)),
+                        TextFont {
+                            font: font.clone(),
+                            font_size: 28.,
+                            ..default()
+                        },
+                    ));
+                }
+            }
+        });
+}

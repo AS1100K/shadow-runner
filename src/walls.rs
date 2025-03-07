@@ -324,8 +324,6 @@ fn read_collisions(
                     for out_of_world_entity in &out_of_world_trigger_query {
                         if entity_two == out_of_world_entity || entity_one == out_of_world_entity {
                             // Game Over...
-                            record_time_event
-                                .send(RecordTimeEvent(current_level_info.current_level_id));
                             next_game_state.set(GameState::GameOverScreen);
                             time.pause();
                             return;

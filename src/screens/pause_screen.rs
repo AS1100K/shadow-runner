@@ -1,6 +1,7 @@
 use super::{despawn_screen, game_over_screen::RestartGameButton, MainMenuButton};
 use crate::{
     assets::{FontAssets, IconsAssets},
+    time::{spawn_best_time, TimeTakenRes},
     GameState,
 };
 use bevy::prelude::*;
@@ -31,6 +32,7 @@ fn spawn_screen(
     mut commands: Commands,
     font_assets: Res<FontAssets>,
     icon_assets: Res<IconsAssets>,
+    time_taken_res: Res<TimeTakenRes>,
 ) {
     let font = &font_assets.default_font;
     let reset_icon = &icon_assets.reset_icon;
@@ -166,6 +168,9 @@ fn spawn_screen(
                         ));
                 });
         });
+
+    // Spawn Best Time
+    spawn_best_time(&mut commands, time_taken_res, font, OnPauseScreen, 16., 16.);
 }
 
 fn resume_game_button(
@@ -174,6 +179,7 @@ fn resume_game_button(
 ) {
     for interaction in &query {
         if Interaction::Pressed == *interaction {
+            log::info!("Unpausing Game via Button");
             input.press(KeyCode::Escape);
         }
     }

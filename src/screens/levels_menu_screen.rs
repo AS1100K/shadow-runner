@@ -1,7 +1,8 @@
-use super::{despawn_screen, MainMenuButton};
+use super::{despawn_screen, game_over_screen::RestartGameEvent, MainMenuButton};
 use crate::{
     assets::{self, FontAssets},
     level_manager::{AllLevels, CurrentLevelInfo},
+    time::{spawn_best_time, TimeTakenRes},
     GameState,
 };
 use bevy::prelude::*;
@@ -35,6 +36,7 @@ fn spawn_screen(
     all_levels: Res<AllLevels>,
     font_assets: Res<FontAssets>,
     world: Res<assets::World>,
+    time_taken_res: Res<TimeTakenRes>,
 ) {
     let font = &font_assets.default_font;
 
@@ -162,6 +164,15 @@ fn spawn_screen(
                     }
                 });
         });
+
+    spawn_best_time(
+        &mut commands,
+        time_taken_res,
+        font,
+        OnLevelMenuScreen,
+        70.,
+        16.,
+    );
 }
 
 #[allow(clippy::type_complexity)]
@@ -169,12 +180,15 @@ fn choose_level(
     button_query: Query<(&Interaction, &LevelButton), (With<Button>, Changed<Interaction>)>,
     mut current_level_info: ResMut<CurrentLevelInfo>,
     mut next_game_state: ResMut<NextState<GameState>>,
+    mut restart_game_event: EventWriter<RestartGameEvent>,
 ) {
     for (interaction, level_button) in &button_query {
         if Interaction::Pressed == *interaction {
-            current_level_info.current_level_id = level_button.level_id;
             next_game_state.set(GameState::PlayingScreen);
-
+            if current_level_info.current_level_id == level_button.level_id {
+                restart_game_event.send(RestartGameEvent);
+            }
+            current_level_info.current_level_id = level_button.level_id;
             return;
         }
     }
