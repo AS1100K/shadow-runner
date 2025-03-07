@@ -39,6 +39,8 @@ pub enum AssetsLoadingState {
 pub struct World {
     #[asset(path = "shadow_runner.ldtk")]
     pub ldtk: Handle<LdtkProject>,
+    #[asset(path = "Legacy_Adventure_Pack/Background.png")]
+    pub background: Handle<Image>,
 }
 
 #[derive(AssetCollection, Resource, Clone)]

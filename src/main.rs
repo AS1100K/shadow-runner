@@ -1,4 +1,4 @@
-use bevy::{asset::AssetMetaCheck, prelude::*};
+use bevy::{asset::AssetMetaCheck, prelude::*, window::WindowResolution};
 use bevy_ecs_ldtk::LdtkPlugin;
 use shadow_runner::{camera::MainCameraPlugin, physics::PhysicsPlugin, BasePlugin};
 
@@ -11,6 +11,8 @@ fn main() {
         .set(WindowPlugin {
             primary_window: Some(Window {
                 fit_canvas_to_parent: true,
+                resolution: WindowResolution::new(1280., 720.),
+                title: String::from("Shadow Runner"),
                 ..default()
             }),
             ..default()

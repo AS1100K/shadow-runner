@@ -1,5 +1,8 @@
 use super::{despawn_screen, LevelsMenuButton, MainMenuButton};
-use crate::{assets::FontAssets, GameState};
+use crate::{
+    assets::{self, FontAssets},
+    GameState,
+};
 use bevy::prelude::*;
 
 pub struct CreditScreenPlugin;
@@ -17,7 +20,30 @@ impl Plugin for CreditScreenPlugin {
 #[derive(Component)]
 pub struct OnCreditScreen;
 
-fn spawn_screen(mut commands: Commands, font_assets: Res<FontAssets>) {
+fn spawn_screen(mut commands: Commands, font_assets: Res<FontAssets>, world: Res<assets::World>) {
+    // Spawn Background
+    commands
+        .spawn((
+            Node {
+                width: Val::Vw(100.),
+                height: Val::Vh(100.),
+                position_type: PositionType::Absolute,
+                display: Display::Flex,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                top: Val::Px(0.),
+                left: Val::Px(0.),
+                ..default()
+            },
+            // hsl(213, 71%, 35%)
+            BackgroundColor(Color::hsl(213., 0.71, 0.35)),
+            OnCreditScreen,
+        ))
+        .with_child(ImageNode {
+            image: world.background.clone(),
+            ..default()
+        });
+
     commands
         .spawn((
             OnCreditScreen,
@@ -33,13 +59,12 @@ fn spawn_screen(mut commands: Commands, font_assets: Res<FontAssets>) {
                 left: Val::Px(0.),
                 ..default()
             },
-            BackgroundColor(Color::BLACK),
         ))
         .with_children(|parent| {
             // Thanks for Playing!
             parent.spawn((
                 Text::new("Thanks for Playing!"),
-                TextColor::WHITE,
+                TextColor(Color::hsl(327., 0.24, 0.16)),
                 TextFont {
                     font: font_assets.default_font.clone(),
                     font_size: 100.,
@@ -47,36 +72,16 @@ fn spawn_screen(mut commands: Commands, font_assets: Res<FontAssets>) {
                 },
             ));
 
-            // Social References
+            // Author References
             parent.spawn((
                 Text::new("Game built by AS1100K for `Code for Cause` Game Jam!"),
-                TextColor::WHITE,
+                TextColor(Color::hsl(327., 0.24, 0.16)),
                 TextFont {
                     font: font_assets.default_font.clone(),
-                    font_size: 28.,
+                    font_size: 33.,
                     ..default()
                 },
             ));
-            parent.spawn((
-                Text::new("Source Code: https://github.com/as1100k/shadow-runner"),
-                TextColor::WHITE,
-                TextFont {
-                    font: font_assets.default_font.clone(),
-                    font_size: 28.,
-                    ..default()
-                },
-            ));
-
-            // Spawn Buttons
-            // parent
-            //     .spawn(Node {
-            //         justify_content: JustifyContent::Center,
-            //         align_items: AlignItems::Center,
-            //         ..default()
-            //     })
-            //     .with_children(|parent| {
-
-            //     });
 
             // Spawn Main Menu Button
             parent
@@ -91,7 +96,7 @@ fn spawn_screen(mut commands: Commands, font_assets: Res<FontAssets>) {
                         column_gap: Val::Px(25.),
                         ..default()
                     },
-                    BackgroundColor(Color::hsl(31., 0.72, 0.46)),
+                    BackgroundColor(Color::hsl(327., 0.24, 0.16)),
                 ))
                 .with_child((
                     Text::new("Main Menu"),
@@ -117,7 +122,7 @@ fn spawn_screen(mut commands: Commands, font_assets: Res<FontAssets>) {
                         column_gap: Val::Px(25.),
                         ..default()
                     },
-                    BackgroundColor(Color::hsl(31., 0.72, 0.46)),
+                    BackgroundColor(Color::hsl(327., 0.24, 0.16)),
                 ))
                 .with_child((
                     Text::new("Levels Menu"),

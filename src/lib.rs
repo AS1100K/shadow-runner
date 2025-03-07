@@ -1,6 +1,7 @@
 use assets::AssetsManagerPlugin;
 use bevy::prelude::*;
 use bevy::utils::{Duration, Instant};
+use bevy::window::WindowMode;
 use bevy_ecs_ldtk::LdtkWorldBundle;
 use bevy_light_2d::plugin::Light2dPlugin;
 use hostile_entity::HostilePlugin;
@@ -70,7 +71,11 @@ impl Plugin for BasePlugin {
                 Update,
                 base_game_system.run_if(in_state(assets::AssetsLoadingState::Loaded)),
             )
-            .add_systems(Update, auto_despawn_system)
+            .add_systems(
+                Update,
+                (auto_despawn_system, full_screen)
+                    .run_if(in_state(assets::AssetsLoadingState::Loaded)),
+            )
             .add_systems(
                 OnEnter(assets::AssetsLoadingState::Loaded),
                 play_game_background_music,
@@ -151,4 +156,19 @@ fn play_game_background_music(mut commands: Commands, audio_assets: Res<assets::
         AudioPlayer(audio_assets.smooth_lovin.clone()),
         PlaybackSettings::LOOP,
     ));
+}
+
+fn full_screen(keyboard: Res<ButtonInput<KeyCode>>, mut windows: Query<&mut Window>) {
+    if keyboard.just_pressed(KeyCode::F11) {
+        for mut window in &mut windows {
+            match window.mode {
+                WindowMode::Fullscreen(_) => {
+                    window.mode = WindowMode::Windowed;
+                }
+                _ => {
+                    window.mode = WindowMode::Fullscreen(MonitorSelection::Current);
+                }
+            }
+        }
+    }
 }

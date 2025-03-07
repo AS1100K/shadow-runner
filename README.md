@@ -10,16 +10,12 @@ Run `./run.sh` for more info
 
 - [x] Basic Bevy Template
 - [ ] Game Screens
-    - [ ] Start Screen/Main menu
-        - [x] Mechanism
-        - [ ] Design _Partially Completed_
+    - [x] Start Screen/Main menu
     - [ ] Game Pause
         - [x] Mechanism
         - [ ] Design
     - [x] Game Over
-    - [ ] Level Selector/Level Menu
-        - [x] Mechanism
-        - [ ] Design _Partially Completed_
+    - [x] Level Selector/Level Menu
     - [x] Loading Screen _BUG: Not Rendering_
     - [ ] Settings Screen
     - [x] Credit Screen

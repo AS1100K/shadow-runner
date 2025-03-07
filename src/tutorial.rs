@@ -1,5 +1,5 @@
 use crate::{
-    assets::{EntitySpriteAssets, FontAssets, IconsAssets},
+    assets::{AssetsLoadingState, EntitySpriteAssets, FontAssets, IconsAssets},
     level_manager::CurrentLevelInfo,
     screens::despawn_screen,
     sprite_animation::Animation,
@@ -26,6 +26,10 @@ impl Plugin for GameTutorialPlugin {
                 spawn_basic_keycodes_overlay,
             )
             .add_systems(
+                OnEnter(GameState::MainMenuScreen),
+                despawn_screen::<TutorialLevelSpecific>,
+            )
+            .add_systems(
                 OnExit(TutorialState::OnGoing),
                 despawn_screen::<TutorialParent>,
             )
@@ -39,7 +43,10 @@ impl Plugin for GameTutorialPlugin {
                 Update,
                 update_level_specific_context.run_if(in_state(GameState::PlayingScreen)),
             )
-            .add_systems(Update, auto_remove_tutorial);
+            .add_systems(
+                Update,
+                auto_remove_tutorial.run_if(in_state(AssetsLoadingState::Loaded)),
+            );
     }
 }
 
@@ -73,6 +80,8 @@ fn set_tutorial_state(
     if level.current_level_id == 0 {
         log::info!("Starting Tutorial");
         next_tutorial_state.set(TutorialState::OnGoing);
+    } else {
+        next_tutorial_state.set(TutorialState::Finished);
     }
 }
 
@@ -124,6 +133,7 @@ fn spawn_basic_keycodes_overlay(
                 ..default()
             },
             TutorialParent,
+            TutorialLevelSpecific(0),
         ))
         .with_children(|parent| {
             // Spawn First row
@@ -253,6 +263,7 @@ fn spawn_basic_keycodes_overlay(
                 ..default()
             },
             TutorialParent,
+            TutorialLevelSpecific(0),
         ))
         .with_child((
             Text::new("Press of `D` key to move right."),

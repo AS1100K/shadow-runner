@@ -1,5 +1,8 @@
 use crate::{player::PlayerEntity, ASPECT_RATIO};
-use bevy::prelude::*;
+use bevy::{
+    prelude::*,
+    render::camera::{ScalingMode, Viewport},
+};
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 
@@ -8,7 +11,7 @@ pub struct MainCameraPlugin;
 impl Plugin for MainCameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_camera)
-            .add_systems(Update, sync_camera);
+            .add_systems(Update, (sync_camera, update_camera_viewport));
     }
 }
 
@@ -17,7 +20,51 @@ impl Plugin for MainCameraPlugin {
 pub struct MainCamera;
 
 fn spawn_camera(mut commands: Commands) {
-    commands.spawn(MainCamera);
+    let mut orthographic_project = OrthographicProjection::default_2d();
+    orthographic_project.scaling_mode = ScalingMode::AutoMin {
+        min_width: 1280.,
+        min_height: 720.,
+    };
+
+    commands.spawn(MainCamera).insert(OrthographicProjection {
+        scaling_mode: ScalingMode::AutoMin {
+            min_width: 1280.,
+            min_height: 720.,
+        },
+        ..OrthographicProjection::default_2d()
+    });
+}
+
+fn update_camera_viewport(
+    window_query: Query<&Window, Changed<Window>>,
+    mut camera_query: Query<&mut Camera, With<MainCamera>>,
+) {
+    for window in &window_query {
+        let size = window.size();
+
+        for mut camera in &mut camera_query {
+            let aspect_ratio = size.x / size.y;
+            let viewport_width = if aspect_ratio > ASPECT_RATIO {
+                size.y * ASPECT_RATIO
+            } else {
+                size.x
+            };
+            let viewport_height = if aspect_ratio > ASPECT_RATIO {
+                size.y
+            } else {
+                size.x / ASPECT_RATIO
+            };
+
+            camera.viewport = Some(Viewport {
+                physical_position: UVec2::new(
+                    ((size.x - viewport_width) / 2.0) as u32,
+                    ((size.y - viewport_height) / 2.0) as u32,
+                ),
+                physical_size: UVec2::new(viewport_width as u32, viewport_height as u32),
+                ..Default::default()
+            });
+        }
+    }
 }
 
 #[allow(clippy::type_complexity)]
@@ -65,8 +112,6 @@ fn sync_camera(
                     // level is wider than the screen
                     let height = (level.px_hei as f32 / 9.).round() * 9.;
                     let width = height * ASPECT_RATIO;
-                    orthographic_projection.scaling_mode =
-                        bevy::render::camera::ScalingMode::Fixed { width, height };
                     camera_transform.translation.x =
                         (player_translation.x - level_transform.translation.x - width / 2.)
                             .clamp(0., level.px_wid as f32 - width);
@@ -75,8 +120,6 @@ fn sync_camera(
                     // level is taller than the screen
                     let width = (level.px_wid as f32 / 16.).round() * 16.;
                     let height = width / ASPECT_RATIO;
-                    orthographic_projection.scaling_mode =
-                        bevy::render::camera::ScalingMode::Fixed { width, height };
                     camera_transform.translation.y =
                         (player_translation.y - level_transform.translation.y - height / 2.)
                             .clamp(0., level.px_hei as f32 - height);

@@ -1,6 +1,6 @@
 use super::{despawn_screen, MainMenuButton};
 use crate::{
-    assets::FontAssets,
+    assets::{self, FontAssets},
     level_manager::{AllLevels, CurrentLevelInfo},
     GameState,
 };
@@ -30,8 +30,36 @@ pub struct LevelButton {
     level_id: i32,
 }
 
-fn spawn_screen(mut commands: Commands, all_levels: Res<AllLevels>, font_assets: Res<FontAssets>) {
+fn spawn_screen(
+    mut commands: Commands,
+    all_levels: Res<AllLevels>,
+    font_assets: Res<FontAssets>,
+    world: Res<assets::World>,
+) {
     let font = &font_assets.default_font;
+
+    // Spawn Background
+    commands
+        .spawn((
+            Node {
+                width: Val::Vw(100.),
+                height: Val::Vh(100.),
+                position_type: PositionType::Absolute,
+                display: Display::Flex,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                top: Val::Px(0.),
+                left: Val::Px(0.),
+                ..default()
+            },
+            // hsl(213, 71%, 35%)
+            BackgroundColor(Color::hsl(213., 0.71, 0.35)),
+            OnLevelMenuScreen,
+        ))
+        .with_child(ImageNode {
+            image: world.background.clone(),
+            ..default()
+        });
 
     // Back Button
     commands
@@ -48,7 +76,7 @@ fn spawn_screen(mut commands: Commands, all_levels: Res<AllLevels>, font_assets:
                 padding: UiRect::axes(Val::Px(20.), Val::Px(10.)),
                 ..default()
             },
-            BackgroundColor(Color::hsl(31., 0.72, 0.46)),
+            BackgroundColor(Color::hsl(327., 0.24, 0.16)),
             Button,
             MainMenuButton,
         ))
@@ -81,7 +109,7 @@ fn spawn_screen(mut commands: Commands, all_levels: Res<AllLevels>, font_assets:
         .with_children(|parent| {
             parent.spawn((
                 Text::new("Choose Level"),
-                TextColor(Color::hsl(31., 0.72, 0.46)),
+                TextColor(Color::hsl(327., 0.24, 0.16)),
                 TextFont {
                     font: font.clone(),
                     font_size: 100.,
@@ -121,7 +149,7 @@ fn spawn_screen(mut commands: Commands, all_levels: Res<AllLevels>, font_assets:
                                     justify_content: JustifyContent::Center,
                                     ..default()
                                 },
-                                BackgroundColor(Color::hsl(31., 0.72, 0.46)),
+                                BackgroundColor(Color::hsl(327., 0.24, 0.16)),
                             ))
                             .with_child((
                                 Text::new(format!("{}", level.0)),

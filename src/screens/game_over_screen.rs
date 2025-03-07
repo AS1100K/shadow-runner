@@ -64,7 +64,7 @@ fn spawn_screen(
             parent.spawn((
                 Text::new("Game Over"),
                 // hsl(31, 72%, 46%)
-                TextColor(Color::hsl(31., 0.72, 0.46)),
+                TextColor(Color::hsl(327., 0.24, 0.16)),
                 TextFont {
                     font: font.clone(),
                     font_size: 100.,
@@ -79,7 +79,7 @@ fn spawn_screen(
                     convert_time_to_text(&time_taken_res.stopwatch.elapsed())
                 )),
                 // hsl(31, 72%, 46%)
-                TextColor(Color::hsl(31., 0.72, 0.46)),
+                TextColor(Color::hsl(327., 0.24, 0.16)),
                 TextFont {
                     font: font.clone(),
                     font_size: 28.,
@@ -110,7 +110,7 @@ fn spawn_screen(
                                 column_gap: Val::Px(25.),
                                 ..default()
                             },
-                            BackgroundColor(Color::hsl(31., 0.72, 0.46)),
+                            BackgroundColor(Color::hsl(327., 0.24, 0.16)),
                         ))
                         .with_children(|parent| {
                             parent
@@ -149,7 +149,7 @@ fn spawn_screen(
                                 column_gap: Val::Px(25.),
                                 ..default()
                             },
-                            BackgroundColor(Color::hsl(31., 0.72, 0.46)),
+                            BackgroundColor(Color::hsl(327., 0.24, 0.16)),
                         ))
                         .with_child((
                             Text::new("Main Menu"),
