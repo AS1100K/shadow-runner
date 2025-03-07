@@ -1,18 +1,20 @@
 # Credits
 
+_For any item if the license isn't available then it defaults to [APACHE License](./LICENSE-APACHE)._
+
 ## Tileset/Tilemaps
 
-| Name                           | License                            | Link                                                                     |
-|--------------------------------|------------------------------------|--------------------------------------------------------------------------|
-| Legacy Adventure Pack - Forest | _Not Specified_                    | [Link](https://anokolisa.itch.io/legacy-adventure-pack-forest)           |
-| DUNGEON TILE SET               | [_N-RS-RD_](#license-abbreviation) | [Link](https://incolgames.itch.io/dungeon-platformer-tile-set-pixel-art) |
+| Name                           | License                            | Link                                                                     | Location in Repository Path                                                                  |
+|--------------------------------|------------------------------------|--------------------------------------------------------------------------|----------------------------------------------------------------------------------------------|
+| Legacy Adventure Pack - Forest | _Not Specified_                    | [Link](https://anokolisa.itch.io/legacy-adventure-pack-forest)           | `./assets/Legacy_Adventure_Pack/Background.png`, `./assets/Legacy_Adventure_Pack/Assets.png` |
+| DUNGEON TILE SET               | [_N-RS-RD_](#license-abbreviation) | [Link](https://incolgames.itch.io/dungeon-platformer-tile-set-pixel-art) | `./assets/Legacy_Adventure_Pack/Dungeon.png`                                                 |
 
 ## Icons
 
-| Name            | License                     | Link                                              |
-|-----------------|-----------------------------|---------------------------------------------------|
-| Icon Godot Node | Creative Commons Zero (CC0) | [Link](https://pixel-boy.itch.io/icon-godot-node) |
-| Rotating Arrow  | _Not Specified_             | [Link](https://rjramaral.itch.io/rotating-arrow)  |
+| Name            | License                     | Link                                              | Location in Repository                                       |
+|-----------------|-----------------------------|---------------------------------------------------|--------------------------------------------------------------|
+| Icon Godot Node | Creative Commons Zero (CC0) | [Link](https://pixel-boy.itch.io/icon-godot-node) | `assets/icons/icon_heart.png`, `assets/icons/icon_reset.png` |
+| Rotating Arrow  | _Not Specified_             | [Link](https://rjramaral.itch.io/rotating-arrow)  | `assets/icons/arrow_down.png`                                |
 
 ## Characters/Entities
 
