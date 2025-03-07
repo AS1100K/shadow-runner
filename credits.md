@@ -12,6 +12,7 @@
 | Name            | License                     | Link                                              |
 |-----------------|-----------------------------|---------------------------------------------------|
 | Icon Godot Node | Creative Commons Zero (CC0) | [Link](https://pixel-boy.itch.io/icon-godot-node) |
+| Rotating Arrow  | _Not Specified_             | [Link](https://rjramaral.itch.io/rotating-arrow)  |
 
 ## Characters/Entities
 

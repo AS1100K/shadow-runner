@@ -1,16 +1,19 @@
 use bevy::{prelude::*, utils::HashMap};
 use bevy_ecs_ldtk::prelude::*;
 use bevy_ecs_tilemap::{map::TilemapId, tiles::TileBundle};
+use bevy_light_2d::light::PointLight2d;
 use bevy_rapier2d::prelude::*;
 
 use crate::{
-    assets::AssetsLoadingState,
+    assets::{AssetsLoadingState, IconsAssets},
     hostile_entity::{DamageCount, HostileEntity},
     level_manager::CurrentLevelInfo,
     player::PlayerEntity,
     special_tiles::SpikeEntity,
+    sprite_animation::Animation,
     time::RecordTimeEvent,
-    GameState,
+    tutorial::TutorialLevelSpecific,
+    GameState, GRID_SIZE,
 };
 
 pub struct WallPlugin;
@@ -19,7 +22,12 @@ impl Plugin for WallPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (spawn_wall_collisions, despawn_tile_bundle, read_collisions)
+            (
+                spawn_wall_collisions,
+                despawn_tile_bundle,
+                read_collisions,
+                next_level_hint,
+            )
                 .chain()
                 .run_if(in_state(AssetsLoadingState::Loaded)),
         )
@@ -332,5 +340,39 @@ fn read_collisions(
                 }
             }
         };
+    }
+}
+
+fn next_level_hint(
+    query: Query<&Transform, Added<NextLevelTrigger>>,
+    current_level_info: Res<CurrentLevelInfo>,
+    icons_assets: Res<IconsAssets>,
+    mut commands: Commands,
+) {
+    for transform in &query {
+        log::info!("Next Level is at {:?}", transform.translation);
+        commands.spawn((
+            TutorialLevelSpecific(current_level_info.current_level_id),
+            Sprite {
+                image: icons_assets.arrow_down.clone(),
+                texture_atlas: Some(icons_assets.arrow_down_layout.clone().into()),
+                custom_size: Some(Vec2::new(32., 32.)),
+                ..default()
+            },
+            Transform {
+                translation: Vec3 {
+                    x: transform.translation.x,
+                    y: transform.translation.y + 50.,
+                    z: 5.,
+                },
+                ..default()
+            },
+            PointLight2d {
+                intensity: 0.8,
+                radius: GRID_SIZE as f32 * 2.,
+                ..default()
+            },
+            Animation::new(0, 4, Timer::from_seconds(0.25, TimerMode::Repeating)),
+        ));
     }
 }

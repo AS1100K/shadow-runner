@@ -119,6 +119,19 @@ pub struct IconsAssets {
     pub keyboard_spacebar_2: Handle<Image>,
     #[asset(path = "keyboard/keyboard_SpaceBar_3.png")]
     pub keyboard_spacebar_3: Handle<Image>,
+    #[asset(path = "icons/arrow_down.png")]
+    pub arrow_down: Handle<Image>,
+    #[asset(texture_atlas_layout(
+        tile_size_x = 112,
+        tile_size_y = 153,
+        columns = 5,
+        rows = 1,
+        padding_x = 0,
+        padding_y = 0,
+        offset_x = 0,
+        offset_y = 0
+    ))]
+    pub arrow_down_layout: Handle<TextureAtlasLayout>,
 }
 
 #[derive(AssetCollection, Resource, Clone)]
