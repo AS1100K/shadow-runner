@@ -131,6 +131,27 @@ fn spawn_screen(mut commands: Commands, font_assets: Res<FontAssets>, world: Res
                     },
                 ));
         });
+
+    // Spawn Author Text
+    commands
+        .spawn((
+            OnMainMenuScreen,
+            Node {
+                position_type: PositionType::Absolute,
+                bottom: Val::Px(10.),
+                left: Val::Px(10.),
+                ..default()
+            },
+        ))
+        .with_child((
+            Text::new("Built by AS1100K for `Code for Cause` Game Jam"),
+            TextColor::WHITE,
+            TextFont {
+                font: font.clone(),
+                font_size: 28.,
+                ..default()
+            },
+        ));
 }
 
 fn exit_game(

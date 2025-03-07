@@ -683,6 +683,50 @@ fn update_level_specific_context(
                         ));
                     });
             }
+            5 => {
+                commands.spawn(
+                    (
+                        AutoDespawn::new_recursive_despawn(Duration::from_secs(30)),
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(10.),
+                            bottom: Val::Px(10.),
+                            ..default()
+                        },
+                        TutorialLevelSpecific(5)
+                    )
+                ).with_child((
+                    Text::new("You are now very close to escape\nThis is heavily guarded dungeon\nDodge Them!"),
+                    TextColor::WHITE,
+                    TextFont {
+                        font: font_assets.default_font.clone(),
+                        font_size: 33.,
+                        ..default()
+                    }
+                ));
+            }
+            6 => {
+                commands
+                    .spawn((
+                        AutoDespawn::new_recursive_despawn(Duration::from_secs(30)),
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(10.),
+                            bottom: Val::Px(10.),
+                            ..default()
+                        },
+                        TutorialLevelSpecific(5),
+                    ))
+                    .with_child((
+                        Text::new("Well I am pretty Suprised!\nThis place is huge"),
+                        TextColor::WHITE,
+                        TextFont {
+                            font: font_assets.default_font.clone(),
+                            font_size: 33.,
+                            ..default()
+                        },
+                    ));
+            }
             _ => {}
         }
     }

@@ -20,7 +20,9 @@ impl Plugin for GameOverPlugin {
             )
             .add_systems(
                 Update,
-                restart_game.run_if(in_state(GameState::GameOverScreen)),
+                restart_game.run_if(
+                    in_state(GameState::GameOverScreen).or(in_state(GameState::PauseScreen)),
+                ),
             );
     }
 }

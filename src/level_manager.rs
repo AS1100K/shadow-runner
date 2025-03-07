@@ -30,9 +30,9 @@ pub struct CurrentLevelInfo {
     (2, String::from("997c2d10-e920-11ef-8467-b50eccdc60ea")),
     (3, String::from("07ac0460-e920-11ef-8331-0f7fddd3f7bb")),
     (4, String::from("475be4d0-e920-11ef-86d8-078ecf53bd51")),
+    (5, String::from("ba671de0-e920-11ef-bc2d-cd9bc8c49fd1")),
+    (6, String::from("bc5df290-e920-11ef-bc2d-bdef4a2b2267")),
     // TODO: Update Levels laters once they are created
-    // (5, String::from("")),
-    // (6, String::from("")),
     // (7, String::from("")),
     // (8, String::from("")),
     // (9, String::from("")),

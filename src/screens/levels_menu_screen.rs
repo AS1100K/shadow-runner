@@ -152,7 +152,7 @@ fn spawn_screen(
                                 BackgroundColor(Color::hsl(327., 0.24, 0.16)),
                             ))
                             .with_child((
-                                Text::new(format!("{}", level.0)),
+                                Text::new(format!("{}", level.0 + 1)),
                                 TextColor(Color::WHITE),
                                 TextFont {
                                     font: font.clone(),
