@@ -288,18 +288,18 @@ fn add_blindness(
             Color::Srgba(YELLOW)
         };
 
-        commands
-            .entity(player)
-            .insert(PointLight2d {
-                radius: GRID_SIZE as f32 * 4.,
-                color: light_color,
-                intensity: 0.8,
-                ..default()
-            })
-            .insert((
-                AudioPlayer(audio_assets.i_can_feel_it_coming.clone()),
-                PlaybackSettings::REMOVE,
-            ));
+        commands.entity(player).insert(PointLight2d {
+            radius: GRID_SIZE as f32 * 4.,
+            color: light_color,
+            intensity: 0.8,
+            ..default()
+        });
+
+        // Spawn Background Music
+        commands.spawn((
+            AudioPlayer(audio_assets.i_can_feel_it_coming.clone()),
+            PlaybackSettings::REMOVE,
+        ));
 
         for main_camera in &main_camera_query {
             commands.entity(main_camera).insert(AmbientLight2d {
