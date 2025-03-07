@@ -11,9 +11,7 @@ Run `./run.sh` for more info
 - [x] Basic Bevy Template
 - [ ] Game Screens
     - [x] Start Screen/Main menu
-    - [ ] Game Pause
-        - [x] Mechanism
-        - [ ] Design
+    - [x] Game Pause
     - [x] Game Over
     - [x] Level Selector/Level Menu
     - [x] Loading Screen _BUG: Not Rendering_

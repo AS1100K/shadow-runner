@@ -56,8 +56,8 @@ fn spawn_screen(
                 top: Val::Px(0.),
                 ..default()
             },
-            // White With 10% Opacity
-            BackgroundColor(Color::hsla(0., 1., 1., 0.1)),
+            // White With 20% Opacity
+            BackgroundColor(Color::hsla(0., 1., 1., 0.2)),
         ))
         .with_children(|parent| {
             // Spawn Text
