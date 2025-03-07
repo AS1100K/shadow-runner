@@ -1,6 +1,7 @@
 use assets::AssetsManagerPlugin;
 use bevy::prelude::*;
 use bevy::utils::{Duration, Instant};
+#[cfg(not(all(target_arch = "wasm32", target_os = "unknown")))]
 use bevy::window::WindowMode;
 use bevy_ecs_ldtk::LdtkWorldBundle;
 use bevy_light_2d::plugin::Light2dPlugin;
@@ -73,7 +74,11 @@ impl Plugin for BasePlugin {
             )
             .add_systems(
                 Update,
-                (auto_despawn_system, full_screen)
+                (
+                    auto_despawn_system,
+                    #[cfg(not(all(target_arch = "wasm32", target_os = "unknown")))]
+                    full_screen,
+                )
                     .run_if(in_state(assets::AssetsLoadingState::Loaded)),
             )
             .add_systems(
@@ -158,6 +163,7 @@ fn play_game_background_music(mut commands: Commands, audio_assets: Res<assets::
     ));
 }
 
+#[cfg(not(all(target_arch = "wasm32", target_os = "unknown")))]
 fn full_screen(keyboard: Res<ButtonInput<KeyCode>>, mut windows: Query<&mut Window>) {
     if keyboard.just_pressed(KeyCode::F11) {
         for mut window in &mut windows {
