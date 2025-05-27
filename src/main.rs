@@ -35,6 +35,7 @@ fn main() {
                 ..default()
             }),
             synchronous_pipeline_compilation: false,
+            ..default()
         });
     }
 
