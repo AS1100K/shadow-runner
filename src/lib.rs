@@ -1,6 +1,6 @@
 use assets::AssetsManagerPlugin;
+use bevy::platform::time::Instant;
 use bevy::prelude::*;
-use bevy::utils::{Duration, Instant};
 #[cfg(not(all(target_arch = "wasm32", target_os = "unknown")))]
 use bevy::window::WindowMode;
 use bevy_ecs_ldtk::LdtkWorldBundle;
@@ -11,6 +11,7 @@ use player::PlayerPlugin;
 use screens::ScreensPlugin;
 use special_tiles::SpecialTilesPlugin;
 use sprite_animation::SpriteAnimationPlugin;
+use std::time::Duration;
 use time::TimeTakenPlugin;
 use tutorial::GameTutorialPlugin;
 use walls::WallPlugin;
@@ -119,11 +120,10 @@ fn base_game_system(
 }
 
 #[derive(Component, better_default::Default)]
-#[default(instant: Instant::now(), duration: Duration::from_secs(5), recursive_despawn: true)]
+#[default(instant: Instant::now(), duration: Duration::from_secs(5))]
 pub struct AutoDespawn {
     instant: Instant,
     duration: Duration,
-    recursive_despawn: bool,
 }
 
 impl AutoDespawn {
@@ -131,15 +131,6 @@ impl AutoDespawn {
         Self {
             instant: Instant::now(),
             duration,
-            recursive_despawn: false,
-        }
-    }
-
-    pub fn new_recursive_despawn(duration: Duration) -> Self {
-        Self {
-            instant: Instant::now(),
-            duration,
-            recursive_despawn: true,
         }
     }
 }
@@ -147,11 +138,7 @@ impl AutoDespawn {
 pub fn auto_despawn_system(mut commands: Commands, query: Query<(Entity, &AutoDespawn)>) {
     for (entity, auto_despawn) in &query {
         if auto_despawn.instant.elapsed() > auto_despawn.duration {
-            if auto_despawn.recursive_despawn {
-                commands.entity(entity).despawn_recursive();
-            } else {
-                commands.entity(entity).despawn();
-            }
+            commands.entity(entity).despawn();
         }
     }
 }
@@ -168,11 +155,14 @@ fn full_screen(keyboard: Res<ButtonInput<KeyCode>>, mut windows: Query<&mut Wind
     if keyboard.just_pressed(KeyCode::F11) {
         for mut window in &mut windows {
             match window.mode {
-                WindowMode::Fullscreen(_) => {
+                WindowMode::Fullscreen(..) => {
                     window.mode = WindowMode::Windowed;
                 }
                 _ => {
-                    window.mode = WindowMode::Fullscreen(MonitorSelection::Current);
+                    window.mode = WindowMode::Fullscreen(
+                        MonitorSelection::Current,
+                        VideoModeSelection::Current,
+                    );
                 }
             }
         }

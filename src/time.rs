@@ -1,7 +1,8 @@
 use crate::{assets::FontAssets, screens::despawn_screen, GameState};
+use bevy::platform::collections::HashMap;
 use bevy::prelude::*;
 use bevy::time::Stopwatch;
-use bevy::utils::{Duration, HashMap};
+use std::time::Duration;
 
 pub struct TimeTakenPlugin;
 

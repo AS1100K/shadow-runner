@@ -63,7 +63,9 @@ fn jump_booster_collision_event(
 ) {
     for collision in collision_events.read() {
         if let CollisionEvent::Started(entity_one, entity_two, ..) = *collision {
-            let (player_entity, mut player_velocty) = player_query.single_mut();
+            let Ok((player_entity, mut player_velocty)) = player_query.single_mut() else {
+                return;
+            };
 
             if entity_one == player_entity || entity_two == player_entity {
                 for (jump_booster_entity, jump_booster) in &jump_booster_query {

@@ -68,7 +68,7 @@ fn sync_level_changes(
         {
             log::info!("Inserting level {}", current_level_info.current_level_id);
             commands.insert_resource(LevelSelection::iid(level_iid));
-            restart_time_event.send(RestartTimeEvent);
+            restart_time_event.write(RestartTimeEvent);
         } else {
             next_game_state.set(GameState::CreditScreen);
             // log::error!("Level didn't found, make sure the ldtk map is syned with the default implementation.");

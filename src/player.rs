@@ -9,11 +9,11 @@ use crate::{
     time::RecordTimeEvent,
     GameState, GRID_SIZE,
 };
-use bevy::utils::Duration;
 use bevy::{color::palettes::css::YELLOW, prelude::*, time::common_conditions::on_real_timer};
 use bevy_ecs_ldtk::prelude::*;
 use bevy_light_2d::prelude::{AmbientLight2d, PointLight2d};
 use bevy_rapier2d::prelude::Velocity;
+use std::time::Duration;
 
 pub struct PlayerPlugin;
 
@@ -213,7 +213,7 @@ fn sync_healthbar(
     for health_bar in &health_bar_query {
         if health_bar.health == 0 {
             // Game Over
-            record_time_event.send(RecordTimeEvent(current_level_info.current_level_id));
+            record_time_event.write(RecordTimeEvent(current_level_info.current_level_id));
             next_game_state.set(GameState::GameOverScreen);
             time.pause();
             return;
@@ -223,7 +223,7 @@ fn sync_healthbar(
             let mut health_bar_context_commands = commands.entity(health_bar_context);
 
             // Remove the old hearts
-            health_bar_context_commands.despawn_descendants();
+            health_bar_context_commands.despawn();
 
             // Generate Sprite Bundle with all the hearts
             health_bar_context_commands.with_children(|parent| {

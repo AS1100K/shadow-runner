@@ -6,7 +6,7 @@ use crate::{
     AutoDespawn, GameState,
 };
 use bevy::prelude::*;
-use bevy::utils::Duration;
+use std::time::Duration;
 
 pub struct GameTutorialPlugin;
 
@@ -357,7 +357,7 @@ fn update_level_specific_context(
             2 => {
                 commands
                     .spawn((
-                        AutoDespawn::new_recursive_despawn(Duration::from_secs(30)),
+                        AutoDespawn::new(Duration::from_secs(30)),
                         Node {
                             right: Val::Px(10.),
                             bottom: Val::Px(10.),
@@ -644,7 +644,7 @@ fn update_level_specific_context(
             4 => {
                 commands
                     .spawn((
-                        AutoDespawn::new_recursive_despawn(Duration::from_secs(30)),
+                        AutoDespawn::new(Duration::from_secs(30)),
                         Node {
                             position_type: PositionType::Absolute,
                             right: Val::Px(10.),
@@ -686,7 +686,7 @@ fn update_level_specific_context(
             5 => {
                 commands.spawn(
                     (
-                        AutoDespawn::new_recursive_despawn(Duration::from_secs(30)),
+                        AutoDespawn::new(Duration::from_secs(30)),
                         Node {
                             position_type: PositionType::Absolute,
                             left: Val::Px(10.),
@@ -708,7 +708,7 @@ fn update_level_specific_context(
             6 => {
                 commands
                     .spawn((
-                        AutoDespawn::new_recursive_despawn(Duration::from_secs(30)),
+                        AutoDespawn::new(Duration::from_secs(30)),
                         Node {
                             position_type: PositionType::Absolute,
                             left: Val::Px(10.),
@@ -730,7 +730,7 @@ fn update_level_specific_context(
             7 => {
                 commands
                     .spawn((
-                        AutoDespawn::new_recursive_despawn(Duration::from_secs(30)),
+                        AutoDespawn::new(Duration::from_secs(30)),
                         Node {
                             position_type: PositionType::Absolute,
                             left: Val::Px(10.),
@@ -754,7 +754,7 @@ fn update_level_specific_context(
             8 => {
                 commands
                     .spawn((
-                        AutoDespawn::new_recursive_despawn(Duration::from_secs(30)),
+                        AutoDespawn::new(Duration::from_secs(30)),
                         Node {
                             position_type: PositionType::Absolute,
                             left: Val::Px(10.),
@@ -786,7 +786,7 @@ fn auto_remove_tutorial(
     if current_level_info.is_changed() {
         for (entity, tutorial) in &query {
             if tutorial.0 != current_level_info.current_level_id {
-                commands.entity(entity).despawn_recursive();
+                commands.entity(entity).despawn();
             }
         }
     }

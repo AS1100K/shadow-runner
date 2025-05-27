@@ -1,5 +1,5 @@
 use bevy::{
-    ecs::{component::ComponentId, world::DeferredWorld},
+    ecs::component::{HookContext, Mutable},
     prelude::*,
 };
 use std::marker::PhantomData;
@@ -25,23 +25,19 @@ impl<B: Bundle> Default for Maybe<B> {
 }
 
 impl<B: Bundle> Component for Maybe<B> {
+    type Mutability = Mutable;
+
     const STORAGE_TYPE: bevy::ecs::component::StorageType =
         bevy::ecs::component::StorageType::SparseSet;
 
     fn register_component_hooks(hooks: &mut bevy::ecs::component::ComponentHooks) {
-        hooks.on_add(maybe_hook::<B>);
+        hooks.on_add(|mut world, HookContext { entity, .. }| {
+            world.commands().queue(MaybeCommand {
+                entity,
+                _phantom: PhantomData::<B>,
+            });
+        });
     }
-}
-
-/// A hook that runs whenever [`Maybe`] is added to an entity.
-///
-/// Generates a [`MaybeCommand`].
-fn maybe_hook<B: Bundle>(mut world: DeferredWorld<'_>, entity: Entity, _component_id: ComponentId) {
-    // Component hooks can't perform structural changes, so we need to rely on commands.
-    world.commands().queue(MaybeCommand {
-        entity,
-        _phantom: PhantomData::<B>,
-    });
 }
 
 struct MaybeCommand<B> {

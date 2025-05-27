@@ -26,13 +26,15 @@ fn spawn_camera(mut commands: Commands) {
         min_height: 720.,
     };
 
-    commands.spawn(MainCamera).insert(OrthographicProjection {
-        scaling_mode: ScalingMode::AutoMin {
-            min_width: 1280.,
-            min_height: 720.,
-        },
-        ..OrthographicProjection::default_2d()
-    });
+    commands
+        .spawn(MainCamera)
+        .insert(Projection::Orthographic(OrthographicProjection {
+            scaling_mode: ScalingMode::AutoMin {
+                min_width: 1280.,
+                min_height: 720.,
+            },
+            ..OrthographicProjection::default_2d()
+        }));
 }
 
 fn update_camera_viewport(
@@ -70,14 +72,11 @@ fn update_camera_viewport(
 #[allow(clippy::type_complexity)]
 fn sync_camera(
     mut camera_query: Query<
-        (&mut Transform, &mut OrthographicProjection),
+        (&mut Transform, &mut Projection),
         (With<MainCamera>, Without<PlayerEntity>),
     >,
     player_query: Query<&Transform, With<PlayerEntity>>,
-    level_query: Query<
-        (&Transform, &LevelIid),
-        (Without<OrthographicProjection>, Without<PlayerEntity>),
-    >,
+    level_query: Query<(&Transform, &LevelIid), (Without<Projection>, Without<PlayerEntity>)>,
     ldtk_projects: Query<&LdtkProjectHandle>,
     level_selection: Option<Res<LevelSelection>>,
     ldtk_project_assets: Res<Assets<LdtkProject>>,
@@ -85,49 +84,59 @@ fn sync_camera(
     if let Ok(Transform {
         translation: player_translation,
         ..
-    }) = player_query.get_single()
+    }) = player_query.single()
     {
         let player_translation = *player_translation;
 
-        let (mut camera_transform, mut orthographic_projection) = camera_query.single_mut();
+        let Ok((mut camera_transform, orthographic_projection)) = camera_query.single_mut() else {
+            return;
+        };
 
-        for (level_transform, level_iid) in &level_query {
-            let ldtk_project = ldtk_project_assets
-                .get(ldtk_projects.single())
-                .expect("Project should be loaded if level has spawned");
+        if let Projection::Orthographic(orthographic_projection) =
+            orthographic_projection.into_inner()
+        {
+            for (level_transform, level_iid) in &level_query {
+                let ldtk_project = ldtk_project_assets
+                    .get(
+                        ldtk_projects
+                            .single()
+                            .expect("Expected ldtk project to be loaded at this point."),
+                    )
+                    .expect("Project should be loaded if level has spawned");
 
-            let level = ldtk_project
-                .get_raw_level_by_iid(&level_iid.to_string())
-                .expect("Spawned level should exist in LDtk Project");
+                let level = ldtk_project
+                    .get_raw_level_by_iid(&level_iid.to_string())
+                    .expect("Spawned level should exist in LDtk Project");
 
-            let Some(level_selection) = level_selection.as_ref() else {
-                return;
-            };
+                let Some(level_selection) = level_selection.as_ref() else {
+                    return;
+                };
 
-            if level_selection.is_match(&LevelIndices::default(), level) {
-                let level_ratio = level.px_wid as f32 / level.px_hei as f32;
-                orthographic_projection.viewport_origin = Vec2::ZERO;
+                if level_selection.is_match(&LevelIndices::default(), level) {
+                    let level_ratio = level.px_wid as f32 / level.px_hei as f32;
+                    orthographic_projection.viewport_origin = Vec2::ZERO;
 
-                if level_ratio > ASPECT_RATIO {
-                    // level is wider than the screen
-                    let height = (level.px_hei as f32 / 9.).round() * 9.;
-                    let width = height * ASPECT_RATIO;
-                    camera_transform.translation.x =
-                        (player_translation.x - level_transform.translation.x - width / 2.)
-                            .clamp(0., level.px_wid as f32 - width);
-                    camera_transform.translation.y = 0.;
-                } else {
-                    // level is taller than the screen
-                    let width = (level.px_wid as f32 / 16.).round() * 16.;
-                    let height = width / ASPECT_RATIO;
-                    camera_transform.translation.y =
-                        (player_translation.y - level_transform.translation.y - height / 2.)
-                            .clamp(0., level.px_hei as f32 - height);
-                    camera_transform.translation.x = 0.;
+                    if level_ratio > ASPECT_RATIO {
+                        // level is wider than the screen
+                        let height = (level.px_hei as f32 / 9.).round() * 9.;
+                        let width = height * ASPECT_RATIO;
+                        camera_transform.translation.x =
+                            (player_translation.x - level_transform.translation.x - width / 2.)
+                                .clamp(0., level.px_wid as f32 - width);
+                        camera_transform.translation.y = 0.;
+                    } else {
+                        // level is taller than the screen
+                        let width = (level.px_wid as f32 / 16.).round() * 16.;
+                        let height = width / ASPECT_RATIO;
+                        camera_transform.translation.y =
+                            (player_translation.y - level_transform.translation.y - height / 2.)
+                                .clamp(0., level.px_hei as f32 - height);
+                        camera_transform.translation.x = 0.;
+                    }
+
+                    camera_transform.translation.x += level_transform.translation.x;
+                    camera_transform.translation.y += level_transform.translation.y;
                 }
-
-                camera_transform.translation.x += level_transform.translation.x;
-                camera_transform.translation.y += level_transform.translation.y;
             }
         }
     }

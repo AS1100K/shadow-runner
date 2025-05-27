@@ -1,4 +1,4 @@
-use bevy::{prelude::*, utils::HashMap};
+use bevy::{platform::collections::HashMap, prelude::*};
 use bevy_ecs_ldtk::prelude::*;
 use bevy_ecs_tilemap::{map::TilemapId, tiles::TileBundle};
 use bevy_light_2d::light::PointLight2d;
@@ -73,14 +73,14 @@ pub fn spawn_wall_collisions(
     wall_query: Query<
         (
             &GridCoords,
-            &Parent,
+            &ChildOf,
             Option<&OutOfWorldEntity>,
             Option<&NextLevelEntity>,
             Option<&SpikeEntity>,
         ),
         Added<GlobalWallEntity>,
     >,
-    parent_query: Query<&Parent, Without<GlobalWallEntity>>,
+    parent_query: Query<&ChildOf, Without<GlobalWallEntity>>,
     level_query: Query<(Entity, &LevelIid)>,
     ldtk_projects: Query<&LdtkProjectHandle>,
     ldtk_project_assets: Res<Assets<LdtkProject>>,
@@ -122,7 +122,7 @@ pub fn spawn_wall_collisions(
             // An intgrid tile's direct parent will be a layer entity, not the level entity
             // To get the level entity, you need the tile's grandparent.
             // This is where parent_query comes in.
-            if let Ok(grandparent) = parent_query.get(parent.get()) {
+            if let Ok(grandparent) = parent_query.get(parent.parent()) {
                 let int_cell_id = match (out_of_world, next_level_entity, spike_entity) {
                     (Some(_), None, None) => 2,
                     (None, Some(_), None) => 3,
@@ -130,7 +130,7 @@ pub fn spawn_wall_collisions(
                     _ => 1,
                 };
                 level_to_wall_locations
-                    .entry(grandparent.get())
+                    .entry(grandparent.parent())
                     .or_default()
                     .insert(grid_coords, int_cell_id);
             }
@@ -141,7 +141,11 @@ pub fn spawn_wall_collisions(
         level_query.iter().for_each(|(level_entity, level_iid)| {
             if let Some(level_walls) = level_to_wall_locations.get(&level_entity) {
                 let ldtk_project = ldtk_project_assets
-                    .get(ldtk_projects.single())
+                    .get(
+                        ldtk_projects
+                            .single()
+                            .expect("ldtk project handle must exist at this point"),
+                    )
                     .expect("Project should be loaded if level has spawned");
 
                 let level = ldtk_project
@@ -316,8 +320,10 @@ fn read_collisions(
 ) {
     for collision_event in collision_events.read() {
         if let &CollisionEvent::Started(entity_one, entity_two, ..) = collision_event {
-            let player_entity = player_query.single();
-            let next_level_trigger_entity = next_level_trigger_query.single();
+            let player_entity = player_query.single().expect("Expected player_entity");
+            let next_level_trigger_entity = next_level_trigger_query
+                .single()
+                .expect("Expected next level trigger entity");
 
             if entity_one == player_entity || entity_two == player_entity {
                 log::info!("Player Collision Detected");
@@ -327,7 +333,7 @@ fn read_collisions(
                 {
                     // Next Level
                     current_level_info.current_level_id += 1;
-                    record_time_event.send(RecordTimeEvent(current_level_info.current_level_id));
+                    record_time_event.write(RecordTimeEvent(current_level_info.current_level_id));
                 } else {
                     for out_of_world_entity in &out_of_world_trigger_query {
                         if entity_two == out_of_world_entity || entity_one == out_of_world_entity {
