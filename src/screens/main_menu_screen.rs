@@ -160,7 +160,7 @@ fn exit_game(
 ) {
     for interaction in &query {
         if Interaction::Pressed == *interaction {
-            app_exit_event.send(AppExit::Success);
+            app_exit_event.write(AppExit::Success);
         }
     }
 }
