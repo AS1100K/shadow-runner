@@ -6,7 +6,7 @@ use crate::{
     AutoDespawn, GameState,
 };
 use bevy::prelude::*;
-use bevy::utils::Duration;
+use std::time::Duration;
 
 pub struct GameTutorialPlugin;
 
@@ -786,7 +786,7 @@ fn auto_remove_tutorial(
     if current_level_info.is_changed() {
         for (entity, tutorial) in &query {
             if tutorial.0 != current_level_info.current_level_id {
-                commands.entity(entity).despawn_recursive();
+                commands.entity(entity).despawn();
             }
         }
     }

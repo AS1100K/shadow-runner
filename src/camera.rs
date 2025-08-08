@@ -1,7 +1,7 @@
 use crate::{player::PlayerEntity, ASPECT_RATIO};
 use bevy::{
     prelude::*,
-    render::camera::{ScalingMode, Viewport},
+    render::camera::Viewport,
 };
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
@@ -20,19 +20,10 @@ impl Plugin for MainCameraPlugin {
 pub struct MainCamera;
 
 fn spawn_camera(mut commands: Commands) {
-    let mut orthographic_project = OrthographicProjection::default_2d();
-    orthographic_project.scaling_mode = ScalingMode::AutoMin {
-        min_width: 1280.,
-        min_height: 720.,
-    };
-
-    commands.spawn(MainCamera).insert(OrthographicProjection {
-        scaling_mode: ScalingMode::AutoMin {
-            min_width: 1280.,
-            min_height: 720.,
-        },
-        ..OrthographicProjection::default_2d()
-    });
+    commands.spawn((
+        MainCamera,
+        Camera2d,
+    ));
 }
 
 fn update_camera_viewport(
@@ -70,13 +61,13 @@ fn update_camera_viewport(
 #[allow(clippy::type_complexity)]
 fn sync_camera(
     mut camera_query: Query<
-        (&mut Transform, &mut OrthographicProjection),
+        &mut Transform,
         (With<MainCamera>, Without<PlayerEntity>),
     >,
     player_query: Query<&Transform, With<PlayerEntity>>,
     level_query: Query<
         (&Transform, &LevelIid),
-        (Without<OrthographicProjection>, Without<PlayerEntity>),
+        (Without<MainCamera>, Without<PlayerEntity>),
     >,
     ldtk_projects: Query<&LdtkProjectHandle>,
     level_selection: Option<Res<LevelSelection>>,
@@ -85,15 +76,15 @@ fn sync_camera(
     if let Ok(Transform {
         translation: player_translation,
         ..
-    }) = player_query.get_single()
+    }) = player_query.single()
     {
         let player_translation = *player_translation;
 
-        let (mut camera_transform, mut orthographic_projection) = camera_query.single_mut();
+        let mut camera_transform = camera_query.single_mut().expect("Camera should exist");
 
         for (level_transform, level_iid) in &level_query {
             let ldtk_project = ldtk_project_assets
-                .get(ldtk_projects.single())
+                .get(ldtk_projects.single().expect("Project should be loaded"))
                 .expect("Project should be loaded if level has spawned");
 
             let level = ldtk_project
@@ -106,7 +97,6 @@ fn sync_camera(
 
             if level_selection.is_match(&LevelIndices::default(), level) {
                 let level_ratio = level.px_wid as f32 / level.px_hei as f32;
-                orthographic_projection.viewport_origin = Vec2::ZERO;
 
                 if level_ratio > ASPECT_RATIO {
                     // level is wider than the screen

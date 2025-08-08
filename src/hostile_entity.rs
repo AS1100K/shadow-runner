@@ -170,7 +170,9 @@ fn damage_player(
     audio_assets: Res<AudioAssets>,
 ) {
     for collision in collision_events.read() {
-        let (player_entity, mut player_healtbar, audio_player) = player_query.single_mut();
+        let Ok((player_entity, mut player_healtbar, audio_player)) = player_query.single_mut() else {
+            return;
+        };
         match *collision {
             CollisionEvent::Started(entity_one, entity_two, ..) => {
                 if entity_one == player_entity || entity_two == player_entity {

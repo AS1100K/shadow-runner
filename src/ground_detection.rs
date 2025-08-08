@@ -1,6 +1,6 @@
 use crate::GameState;
 use bevy::prelude::*;
-use bevy::utils::HashSet;
+use std::collections::HashSet;
 use bevy_rapier2d::prelude::*;
 
 #[derive(Component)]

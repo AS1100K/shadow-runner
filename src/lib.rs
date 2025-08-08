@@ -1,8 +1,8 @@
 use assets::AssetsManagerPlugin;
 use bevy::prelude::*;
-use bevy::utils::{Duration, Instant};
+use std::time::{Duration, Instant};
 #[cfg(not(all(target_arch = "wasm32", target_os = "unknown")))]
-use bevy::window::WindowMode;
+use bevy::window::{WindowMode, MonitorSelection, VideoModeSelection};
 use bevy_ecs_ldtk::LdtkWorldBundle;
 use bevy_light_2d::plugin::Light2dPlugin;
 use hostile_entity::HostilePlugin;
@@ -148,7 +148,7 @@ pub fn auto_despawn_system(mut commands: Commands, query: Query<(Entity, &AutoDe
     for (entity, auto_despawn) in &query {
         if auto_despawn.instant.elapsed() > auto_despawn.duration {
             if auto_despawn.recursive_despawn {
-                commands.entity(entity).despawn_recursive();
+                commands.entity(entity).despawn();
             } else {
                 commands.entity(entity).despawn();
             }
@@ -168,11 +168,11 @@ fn full_screen(keyboard: Res<ButtonInput<KeyCode>>, mut windows: Query<&mut Wind
     if keyboard.just_pressed(KeyCode::F11) {
         for mut window in &mut windows {
             match window.mode {
-                WindowMode::Fullscreen(_) => {
+                WindowMode::Fullscreen(_, _) => {
                     window.mode = WindowMode::Windowed;
                 }
                 _ => {
-                    window.mode = WindowMode::Fullscreen(MonitorSelection::Current);
+                    window.mode = WindowMode::Fullscreen(MonitorSelection::Current, VideoModeSelection::Current);
                 }
             }
         }

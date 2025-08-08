@@ -189,7 +189,7 @@ fn restart_game(
 ) {
     for interaction in &query {
         if Interaction::Pressed == *interaction {
-            restart_game_event.send(RestartGameEvent);
+            restart_game_event.write(RestartGameEvent);
         }
     }
 }
@@ -219,7 +219,7 @@ fn restart_game_event(
             LevelSelection::Iid(iid) => iid,
             LevelSelection::Indices(indice) => {
                 let ldtk_project = ldtk_project_assets
-                    .get(ldtk_projects.single())
+                    .get(ldtk_projects.single().expect("Project should be loaded"))
                     .expect("Project should be loaded if level has spawned");
 
                 &match ldtk_project.get_raw_level_at_indices(indice) {
@@ -241,12 +241,12 @@ fn restart_game_event(
 
         for (level_entity, level_iid) in &levels {
             if level_iid == current_level {
-                restart_time_event.send(RestartTimeEvent);
+                restart_time_event.write(RestartTimeEvent);
                 commands.entity(level_entity).insert(Respawn);
                 next_game_state.set(GameState::PlayingScreen);
                 time.unpause();
 
-                let main_camera = main_camera_query.single();
+                let main_camera = main_camera_query.single().expect("Main camera should exist");
                 commands.entity(main_camera).remove::<AmbientLight2d>();
 
                 return;

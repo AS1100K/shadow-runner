@@ -186,7 +186,7 @@ fn choose_level(
         if Interaction::Pressed == *interaction {
             next_game_state.set(GameState::PlayingScreen);
             if current_level_info.current_level_id == level_button.level_id {
-                restart_game_event.send(RestartGameEvent);
+                restart_game_event.write(RestartGameEvent);
             }
             current_level_info.current_level_id = level_button.level_id;
             return;
