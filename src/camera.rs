@@ -1,7 +1,7 @@
 use crate::{player::PlayerEntity, ASPECT_RATIO};
 use bevy::{
     prelude::*,
-    render::camera::{ScalingMode, Viewport},
+    render::camera::Viewport,
 };
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
